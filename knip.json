@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["src/cli.ts", "src/wizard/index.ts"],
+  "entry": ["src/cli.ts", "src/wizard/index.ts", "src/plugins/index.ts", "src/templates/index.ts"],
   "project": ["src/**/*.ts"],
   "ignore": ["**/*.test.ts", "**/*.spec.ts"],
   "ignoreDependencies": [

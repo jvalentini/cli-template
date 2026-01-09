@@ -39,6 +39,7 @@ help:
 	@echo ""
 	@echo "LINTING:"
 	@echo "  make lint               - Run biome + oxlint + knip with auto-fix"
+	@echo "  make lint-actions       - Lint GitHub Actions workflows"
 	@echo "  make type-check         - Run TypeScript type checking"
 	@echo ""
 	@echo "DOCUMENTATION:"
@@ -178,6 +179,11 @@ typecheck:
 .PHONY: check
 check:
 	@bun run check
+
+.PHONY: lint-actions
+lint-actions:
+	@echo "Linting GitHub Actions workflows..."
+	@mise exec -- actionlint .github/workflows/*.yml
 
 # ============================================
 # Testing

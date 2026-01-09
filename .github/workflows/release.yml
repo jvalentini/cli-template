@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   packages: write
@@ -40,8 +44,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v6
         with:
-          name: cli-template-${{ matrix.target }}
-          path: dist/cli-template-${{ matrix.target }}*
+          name: bakery-${{ matrix.target }}
+          path: dist/bakery-${{ matrix.target }}*
 
   docker:
     name: Build Docker Image
@@ -100,16 +104,16 @@ jobs:
       - name: Prepare release assets
         run: |
           mkdir -p release
-          for dir in dist/cli-template-*; do
+          for dir in dist/bakery-*; do
             cp "$dir/"* release/
           done
-          chmod +x release/cli-template-* || true
+          chmod +x release/bakery-* || true
           ls -la release/
 
       - name: Create checksums
         run: |
           cd release
-          sha256sum cli-template-* > checksums.txt
+          sha256sum bakery-* > checksums.txt
           cat checksums.txt
 
       - name: Create GitHub Release
@@ -117,7 +121,7 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            release/cli-template-*
+            release/bakery-*
             release/checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

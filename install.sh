@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="username/bakery"
+REPO="jvalentini/bakery"
 BINARY_NAME="bakery"
 
 RED='\033[0;31m'

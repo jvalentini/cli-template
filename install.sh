@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="username/cli-template"
-BINARY_NAME="cli-template"
+REPO="username/bakery"
+BINARY_NAME="bakery"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -98,11 +98,11 @@ run_with_mise() {
     tmp_dir=$(mktemp -d)
     trap 'rm -rf "$tmp_dir"' EXIT
 
-    info "Cloning cli-template..."
-    git clone --depth 1 "https://github.com/${REPO}.git" "$tmp_dir/cli-template" 2>/dev/null || \
+    info "Cloning bakery..."
+    git clone --depth 1 "https://github.com/${REPO}.git" "$tmp_dir/bakery" 2>/dev/null || \
         error "Failed to clone repository"
 
-    cd "$tmp_dir/cli-template"
+    cd "$tmp_dir/bakery"
 
     info "Installing tools with mise..."
     mise install
@@ -116,14 +116,14 @@ run_with_mise() {
 }
 
 main() {
-    echo -e "\n${BOLD}${BLUE}CLI Template Installer${NC}\n"
+    echo -e "\n${BOLD}${BLUE}Bakery Installer${NC}\n"
 
     local platform
     platform=$(detect_platform)
     info "Detected platform: ${platform}"
 
-    local version="${CLI_TEMPLATE_VERSION:-}"
-    local use_mise="${CLI_TEMPLATE_USE_MISE:-true}"
+    local version="${BAKERY_VERSION:-}"
+    local use_mise="${BAKERY_USE_MISE:-true}"
 
     if [[ "$use_mise" == "true" ]] || [[ "$use_mise" == "1" ]]; then
         run_with_mise "$@"

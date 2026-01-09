@@ -13,7 +13,7 @@ Run one command, answer a few questions, and get a production-ready project with
 ### One-liner (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jvalentini/cli-template/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/jvalentini/bakery/main/install.sh | bash
 ```
 
 This downloads and runs the interactive wizard directly. No permanent installation required.
@@ -31,8 +31,8 @@ npm install -g bakery
 ### From source
 
 ```bash
-git clone https://github.com/jvalentini/cli-template.git
-cd cli-template
+git clone https://github.com/jvalentini/bakery.git
+cd bakery
 make install
 bun run src/cli.ts
 ```
@@ -214,8 +214,8 @@ Git hooks manager that runs checks automatically on commit/push. Faster than Hus
 
 ```bash
 # Clone this repo
-git clone https://github.com/jvalentini/cli-template.git
-cd cli-template
+git clone https://github.com/jvalentini/bakery.git
+cd bakery
 
 # Install dependencies
 make install

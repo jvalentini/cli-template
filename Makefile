@@ -1,5 +1,5 @@
 # ============================================
-# Makefile for CLI Template
+# Makefile for Bakery
 # TypeScript CLI Tool Generator
 # ============================================
 
@@ -17,8 +17,8 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 # ============================================
 .PHONY: help
 help:
-	@echo "CLI Template"
-	@echo "============"
+	@echo "Bakery"
+	@echo "======"
 	@echo ""
 	@echo "SETUP:"
 	@echo "  make setup              - Install tools, create .env, install git hooks (idempotent)"
@@ -74,7 +74,7 @@ help:
 	@echo "  make clean              - Remove caches, build artifacts, stop containers"
 	@echo ""
 	@echo "AGENT SKILLS:"
-	@echo "  make install-skills     - Install CLI Template skills for AI coding agents"
+	@echo "  make install-skills     - Install Bakery skills for AI coding agents"
 	@echo ""
 	@echo "UTILITIES:"
 	@echo "  make version            - Show version information"
@@ -86,8 +86,8 @@ help:
 .PHONY: setup
 setup:
 	@echo ""
-	@echo "CLI Template Setup"
-	@echo "=================="
+	@echo "Bakery Setup"
+	@echo "============"
 	@echo ""
 	@# Check/install mise
 	@printf "  mise .............. "
@@ -237,7 +237,7 @@ build:
 
 .PHONY: build-binary
 build-binary:
-	@bun build src/cli.ts --compile --outfile cli-template
+	@bun build src/cli.ts --compile --outfile bakery
 
 .PHONY: build-all
 build-all:
@@ -248,10 +248,10 @@ build-all:
 # ============================================
 .PHONY: docker-dev
 docker-dev:
-	@echo "Starting CLI Template development..."
+	@echo "Starting Bakery development..."
 	@docker compose up -d
 	@echo ""
-	@echo "  CLI Template: http://localhost:3000"
+	@echo "  Bakery: http://localhost:3000"
 	@echo ""
 	@echo "Use 'make docker-logs' to view logs, 'make docker-dev-down' to stop"
 
@@ -294,7 +294,7 @@ docker-shell:
 
 .PHONY: docker-build
 docker-build:
-	@docker build -t cli-template:latest --target production .
+	@docker build -t bakery:latest --target production .
 
 .PHONY: docker-logs
 docker-logs:
@@ -362,7 +362,7 @@ clean:
 	@echo "Cleaning..."
 	@-docker compose down 2>/dev/null || true
 	@-rm -rf node_modules/.vite node_modules/.cache .vite src/.vite 2>/dev/null || true
-	@-rm -rf dist coverage docs bun.lockb cli-template-* 2>/dev/null || true
+	@-rm -rf dist coverage docs bun.lockb bakery-* 2>/dev/null || true
 	@-rm -f *.tsbuildinfo tsconfig.*.tsbuildinfo 2>/dev/null || true
 	@echo "Done."
 
@@ -388,7 +388,7 @@ install-skills:
 	@echo "Agent Skills Installer"
 	@echo "======================"
 	@echo ""
-	@echo "This will install CLI Template skills for your AI coding agents."
+	@echo "This will install Bakery skills for your AI coding agents."
 	@echo ""
 	@# Detect available agents
 	@CLAUDE_AVAILABLE=0; \
@@ -414,7 +414,7 @@ install-skills:
 	fi; \
 	echo ""; \
 	echo "Select agents to install skills for:"; \
-	echo "  1) Claude Code  (~/.claude/skills/cli-template/)"; \
+	echo "  1) Claude Code  (~/.claude/skills/bakery/)"; \
 	echo "  2) OpenCode     (~/.config/opencode/skill/)"; \
 	echo "  3) Cursor       (~/.cursor/rules/)"; \
 	echo "  4) All detected"; \
@@ -439,21 +439,21 @@ install-skills:
 	echo ""; \
 	if [ "$$INSTALL_CLAUDE" = "1" ]; then \
 		echo "Installing Claude Code skill..."; \
-		mkdir -p "$$HOME/.claude/skills/cli-template"; \
-		cp docs/agent-skills/claude-code/skill.md "$$HOME/.claude/skills/cli-template/skill.md"; \
-		echo "  -> $$HOME/.claude/skills/cli-template/skill.md"; \
+		mkdir -p "$$HOME/.claude/skills/bakery"; \
+		cp docs/agent-skills/claude-code/skill.md "$$HOME/.claude/skills/bakery/skill.md"; \
+		echo "  -> $$HOME/.claude/skills/bakery/skill.md"; \
 	fi; \
 	if [ "$$INSTALL_OPENCODE" = "1" ]; then \
 		echo "Installing OpenCode skill..."; \
 		mkdir -p "$$HOME/.config/opencode/skill"; \
-		cp docs/agent-skills/opencode/cli-template.md "$$HOME/.config/opencode/skill/cli-template.md"; \
-		echo "  -> $$HOME/.config/opencode/skill/cli-template.md"; \
+		cp docs/agent-skills/opencode/bakery.md "$$HOME/.config/opencode/skill/bakery.md"; \
+		echo "  -> $$HOME/.config/opencode/skill/bakery.md"; \
 	fi; \
 	if [ "$$INSTALL_CURSOR" = "1" ]; then \
 		echo "Installing Cursor skill..."; \
 		mkdir -p "$$HOME/.cursor/rules"; \
-		cp docs/agent-skills/cursor/cli-template.md "$$HOME/.cursor/rules/cli-template.md"; \
-		echo "  -> $$HOME/.cursor/rules/cli-template.md"; \
+		cp docs/agent-skills/cursor/bakery.md "$$HOME/.cursor/rules/bakery.md"; \
+		echo "  -> $$HOME/.cursor/rules/bakery.md"; \
 	fi; \
 	echo ""; \
 	echo "Done!"

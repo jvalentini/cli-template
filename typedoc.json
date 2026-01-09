@@ -2,14 +2,14 @@
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["src/cli.ts", "src/wizard/index.ts"],
   "out": "docs",
-  "name": "CLI Template",
+  "name": "Bakery",
   "readme": "README.md",
   "excludePrivate": true,
   "excludeProtected": true,
   "excludeInternal": true,
   "includeVersion": true,
   "navigationLinks": {
-    "GitHub": "https://github.com/username/cli-template"
+    "GitHub": "https://github.com/username/bakery"
   },
   "plugin": [],
   "theme": "default"

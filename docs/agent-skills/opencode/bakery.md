@@ -13,7 +13,7 @@
 
 ### Creating a New CLI Project
 
-Run the CLI Template wizard:
+Run the Bakery wizard:
 
 ```bash
 # Option 1: Install script

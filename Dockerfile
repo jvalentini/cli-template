@@ -25,7 +25,7 @@ FROM base AS binary-builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG TARGET=linux-x64
-RUN bun build src/cli.ts --compile --target=bun-${TARGET} --outfile /app/dist/cli-template-${TARGET}
+RUN bun build src/cli.ts --compile --target=bun-${TARGET} --outfile /app/dist/bakery-${TARGET}
 
 FROM base AS production
 COPY --from=build /app/dist ./dist

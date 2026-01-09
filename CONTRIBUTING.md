@@ -7,8 +7,8 @@ Thank you for your interest in contributing to Bakery! This document provides gu
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/cli-template.git
-   cd cli-template
+   git clone https://github.com/YOUR_USERNAME/bakery.git
+   cd bakery
    ```
 3. Install dependencies:
    ```bash
@@ -63,7 +63,7 @@ Lefthook will automatically run these checks on commit and push.
 ## Project Structure
 
 ```
-cli-template/
+bakery/
 ├── src/
 │   ├── cli.ts              # CLI entry point
 │   ├── wizard/             # Interactive wizard

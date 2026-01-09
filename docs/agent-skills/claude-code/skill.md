@@ -1,8 +1,8 @@
 ---
-description: Create new CLI tools using the CLI Template wizard. Use when user wants to scaffold a new TypeScript CLI project with modern tooling.
+description: Create new CLI tools using the Bakery wizard. Use when user wants to scaffold a new TypeScript CLI project with modern tooling.
 ---
 
-# CLI Template - Project Creation Skill
+# Bakery - Project Creation Skill
 
 Use this skill when the user wants to create a new CLI tool, command-line application, or TypeScript CLI project.
 
@@ -20,14 +20,14 @@ Use this skill when the user wants to create a new CLI tool, command-line applic
 Run the wizard using the install script:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/username/cli-template/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/username/bakery/main/install.sh | bash
 ```
 
 Or clone and run directly with Bun:
 
 ```bash
-git clone https://github.com/username/cli-template.git
-cd cli-template
+git clone https://github.com/username/bakery.git
+cd bakery
 bun install
 bun run src/cli.ts
 ```
@@ -132,7 +132,7 @@ The generated CLI includes:
 User: "I want to create a CLI tool for managing my dotfiles"
 
 Response:
-1. Run the CLI template wizard
+1. Run the Bakery wizard
 2. Name it `dotfiles-manager`
 3. Add description: "A CLI for managing and syncing dotfiles"
 4. Enable all features (defaults are good)

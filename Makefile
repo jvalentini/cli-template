@@ -328,8 +328,8 @@ bump-major:
 .PHONY: check-main-branch
 check-main-branch:
 	@CURRENT_BRANCH=$$(git branch --show-current 2>/dev/null || git rev-parse --abbrev-ref HEAD); \
-	if [ "$$CURRENT_BRANCH" != "main" ]; then \
-		echo "Error: Releases can only be created on the main branch."; \
+	if [ "$$CURRENT_BRANCH" != "main" ] && [ "$$CURRENT_BRANCH" != "master" ]; then \
+		echo "Error: Releases can only be created on the main or master branch."; \
 		exit 1; \
 	fi
 

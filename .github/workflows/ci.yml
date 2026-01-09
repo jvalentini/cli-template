@@ -52,21 +52,23 @@ jobs:
             exit 0
           fi
           
-          echo "## Coverage Report" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Line Coverage | ${COVERAGE}% |" >> $GITHUB_STEP_SUMMARY
-          echo "| Threshold | ${COVERAGE_THRESHOLD}% |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Coverage Report"
+            echo "| Metric | Value |"
+            echo "|--------|-------|"
+            echo "| Line Coverage | ${COVERAGE}% |"
+            echo "| Threshold | ${COVERAGE_THRESHOLD}% |"
+          } >> "$GITHUB_STEP_SUMMARY"
           
           COVERAGE_INT=$(echo "$COVERAGE * 100" | bc | cut -d. -f1)
-          THRESHOLD_INT=$(echo "$COVERAGE_THRESHOLD * 100" | bc | cut -d. -f1)
+          THRESHOLD_INT=$(echo "${COVERAGE_THRESHOLD} * 100" | bc | cut -d. -f1)
           
           if [ "$COVERAGE_INT" -lt "$THRESHOLD_INT" ]; then
-            echo "| Status | :x: FAILED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Status | :x: FAILED |" >> "$GITHUB_STEP_SUMMARY"
             echo "::error::Coverage ${COVERAGE}% is below threshold ${COVERAGE_THRESHOLD}%"
             exit 1
           else
-            echo "| Status | :white_check_mark: PASSED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Status | :white_check_mark: PASSED |" >> "$GITHUB_STEP_SUMMARY"
             echo "Coverage ${COVERAGE}% meets threshold ${COVERAGE_THRESHOLD}%"
           fi
 

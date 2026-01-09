@@ -1,0 +1,115 @@
+<% if (webFramework === 'vue') { -%>
+<script setup lang="ts">
+<% if (hasAddon('tanstack-query')) { -%>
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
+<% } -%>
+import { ref } from 'vue';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+<% if (hasAddon('tanstack-query')) { -%>
+interface Message {
+  id: string;
+  text: string;
+  createdAt: string;
+}
+
+const queryClient = useQueryClient();
+const inputText = ref('');
+
+const { data: messages, isLoading } = useQuery({
+  queryKey: ['messages'],
+  queryFn: async () => {
+    const res = await fetch(`${API_URL}/api/messages`);
+    return res.json() as Promise<Message[]>;
+  },
+});
+
+const { mutate: createMessage, isPending } = useMutation({
+  mutationFn: async (text: string) => {
+    const res = await fetch(`${API_URL}/api/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    return res.json() as Promise<Message>;
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['messages'] });
+  },
+});
+
+function handleSubmit() {
+  if (inputText.value.trim()) {
+    createMessage(inputText.value);
+    inputText.value = '';
+  }
+}
+<% } else { -%>
+const inputText = ref('');
+<% } -%>
+</script>
+
+<template>
+  <div class="app">
+    <h1><%= projectName %></h1>
+    <p><%= description %></p>
+
+<% if (hasAddon('tanstack-query')) { -%>
+    <form @submit.prevent="handleSubmit" class="form">
+      <input
+        v-model="inputText"
+        type="text"
+        placeholder="Enter a message..."
+        class="input"
+      />
+      <button type="submit" :disabled="isPending" class="button">
+        {{ isPending ? 'Sending...' : 'Send' }}
+      </button>
+    </form>
+
+    <div class="messages">
+      <h2>Messages</h2>
+      <p v-if="isLoading">Loading...</p>
+      <ul v-else-if="messages?.length">
+        <li v-for="msg in messages" :key="msg.id">{{ msg.text }}</li>
+      </ul>
+      <p v-else>No messages yet</p>
+    </div>
+<% } else { -%>
+    <div class="getting-started">
+      <h2>Getting Started</h2>
+      <p>Edit this file to start building your app.</p>
+      <p>API URL: {{ API_URL }}</p>
+    </div>
+<% } -%>
+  </div>
+</template>
+
+<style scoped>
+.app {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form {
+  margin-top: 1rem;
+}
+
+.input {
+  padding: 0.5rem;
+  width: 70%;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
+}
+
+.messages,
+.getting-started {
+  margin-top: 2rem;
+}
+</style>
+<% } -%>

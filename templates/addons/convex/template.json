@@ -1,0 +1,13 @@
+{
+  "name": "convex",
+  "displayName": "Convex",
+  "description": "Real-time database with automatic syncing",
+  "version": "1.0.0",
+  "type": "addon",
+  "files": [
+    "convex/schema.ts.ejs",
+    "convex/items.ts.ejs",
+    "convex/tsconfig.json",
+    ".env.local.example.ejs"
+  ]
+}

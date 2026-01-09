@@ -1,0 +1,19 @@
+<% if (webFramework === 'vue') { -%>
+import { createApp } from 'vue';
+<% if (hasAddon('tanstack-query')) { -%>
+import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query';
+<% } -%>
+import App from './App.vue';
+
+<% if (hasAddon('tanstack-query')) { -%>
+const queryClient = new QueryClient();
+<% } -%>
+
+const app = createApp(App);
+
+<% if (hasAddon('tanstack-query')) { -%>
+app.use(VueQueryPlugin, { queryClient });
+<% } -%>
+
+app.mount('#root');
+<% } -%>

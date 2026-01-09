@@ -1,0 +1,14 @@
+import { defineSchema, defineTable } from 'convex/server';
+import { v } from 'convex/values';
+
+export default defineSchema({
+  items: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    completed: v.optional(v.boolean()),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+    .index('by_created', ['createdAt'])
+    .index('by_completed', ['completed', 'createdAt']),
+});

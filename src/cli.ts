@@ -1,12 +1,15 @@
 #!/usr/bin/env bun
 
+import { createRequire } from 'node:module';
 import { z } from 'zod';
 import { handlePluginsCommand } from './commands/plugins.js';
 import { formatConfigError, loadConfigFile } from './config/index.js';
 import { bold, cyan, dim, error, green } from './utils/colors.js';
 import { runFromConfig, runWizard } from './wizard/index.js';
 
-const VERSION = '0.2.0';
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json') as { version: string };
+const VERSION = pkg.version;
 
 const CliOptionsSchema = z.object({
   output: z

@@ -104,6 +104,9 @@ install_mise() {
 run_with_mise() {
     install_mise
 
+    local original_dir
+    original_dir=$(pwd)
+
     CLEANUP_DIR=$(mktemp -d)
 
     info "Cloning bakery..."
@@ -122,7 +125,8 @@ run_with_mise() {
     bun install --silent
 
     info "Starting wizard...\n"
-    bun run src/cli.ts "$@"
+    cd "$original_dir"
+    bun run "$CLEANUP_DIR/bakery/src/cli.ts" "$@" </dev/tty
 }
 
 main() {
@@ -155,7 +159,7 @@ main() {
     success "Downloaded successfully!\n"
 
     info "Starting wizard...\n"
-    "$binary_path" "$@"
+    "$binary_path" "$@" </dev/tty
     
     local exit_code=$?
     

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "name": "<%= projectName %>",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "readme": "README.md",
+  "plugin": [],
+  "theme": "default",
+  "hideGenerator": true,
+  "searchInComments": true,
+  "categorizeByGroup": true,
+  "defaultCategory": "Other",
+  "categoryOrder": ["*"],
+  "sort": ["alphabetical"],
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": false
+  },
+  "exclude": [
+    "**/node_modules/**",
+    "**/tests/**",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "security",
+  "displayName": "Security Scanning",
+  "description": "Vulnerability and secret scanning with Trivy",
+  "version": "1.0.0",
+  "type": "addon",
+  "files": ["trivy.yaml.ejs", ".github/workflows/security.yml.ejs"]
+}

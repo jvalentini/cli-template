@@ -1,0 +1,77 @@
+# <%= projectName %>
+
+<%= description %>
+
+## Installation
+
+```bash
+bun install
+```
+
+## Usage
+
+```bash
+# Run in development (with hot reload)
+bun run dev
+
+# Run in production
+bun run start
+
+# Or use make
+make dev
+```
+
+## API Endpoints
+
+### Health
+- `GET /health` - Health check with uptime
+- `GET /health/ready` - Readiness probe
+- `GET /health/live` - Liveness probe
+
+### Items (Example CRUD)
+- `GET /api/items` - List all items
+- `GET /api/items/:id` - Get single item
+- `POST /api/items` - Create item
+- `DELETE /api/items/:id` - Delete item
+
+## Development
+
+```bash
+make install     # Install dependencies
+make check       # Run all checks
+make test        # Run tests
+make build       # Build to dist/
+```
+<% if (hasAddon('docs')) { %>
+## Documentation
+
+```bash
+make docs        # Generate API docs
+make docs-serve  # Serve docs locally
+```
+<% } %>
+<% if (hasAddon('security')) { %>
+## Security
+
+```bash
+make security    # Scan for vulnerabilities
+make audit       # Audit dependencies
+```
+<% } %>
+<% if (hasAddon('docker')) { %>
+## Docker
+
+```bash
+# Build image
+docker build -t <%= projectName %> .
+
+# Run container
+docker run -p 3000:3000 <%= projectName %>
+
+# Or use docker-compose
+docker-compose up
+```
+<% } %>
+## License
+
+<%= license %><% if (author) { %> - <%= author %><% } %>

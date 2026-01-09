@@ -1,0 +1,73 @@
+<% if (apiFramework === 'hono') { -%>
+import { Hono } from 'hono';
+
+export const healthRoutes = new Hono();
+
+healthRoutes.get('/', (c) => {
+  return c.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+healthRoutes.get('/ready', (c) => {
+  // Add your readiness checks here (database, cache, etc.)
+  return c.json({
+    status: 'ready',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+healthRoutes.get('/live', (c) => {
+  return c.json({
+    status: 'alive',
+    timestamp: new Date().toISOString(),
+  });
+});
+<% } else if (apiFramework === 'express') { -%>
+import { Router } from 'express';
+
+export const healthRoutes = Router();
+
+healthRoutes.get('/', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+healthRoutes.get('/ready', (req, res) => {
+  // Add your readiness checks here (database, cache, etc.)
+  res.json({
+    status: 'ready',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+healthRoutes.get('/live', (req, res) => {
+  res.json({
+    status: 'alive',
+    timestamp: new Date().toISOString(),
+  });
+});
+<% } else if (apiFramework === 'elysia') { -%>
+import { Elysia } from 'elysia';
+
+export const healthRoutes = new Elysia({ prefix: '/health' })
+  .get('/', () => ({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  }))
+  .get('/ready', () => ({
+    // Add your readiness checks here (database, cache, etc.)
+    status: 'ready',
+    timestamp: new Date().toISOString(),
+  }))
+  .get('/live', () => ({
+    status: 'alive',
+    timestamp: new Date().toISOString(),
+  }));
+<% } -%>

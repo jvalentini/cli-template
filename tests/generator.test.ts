@@ -9,7 +9,7 @@ describe('generator', () => {
   let testDir: string;
 
   beforeEach(() => {
-    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cli-template-test-'));
+    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bakery-test-'));
   });
 
   afterEach(() => {
@@ -22,9 +22,10 @@ describe('generator', () => {
     author: 'Test Author',
     license: 'MIT',
     githubUsername: 'testuser',
-    includeDocker: true,
-    includeCi: true,
-    includeReleaseWorkflow: true,
+    archetype: 'cli',
+    apiFramework: undefined,
+    webFramework: undefined,
+    addons: ['docker', 'ci', 'release', 'docs', 'security', 'zod'],
   };
 
   it('should create package.json with correct name', () => {
@@ -74,7 +75,7 @@ describe('generator', () => {
     expect(fs.existsSync(path.join(testDir, 'tests', 'cli.test.ts'))).toBe(true);
   });
 
-  it('should create Docker files when includeDocker is true', () => {
+  it('should create Docker files when docker addon is enabled', () => {
     generateProject(defaultConfig, testDir);
 
     expect(fs.existsSync(path.join(testDir, 'Dockerfile'))).toBe(true);
@@ -82,35 +83,23 @@ describe('generator', () => {
     expect(fs.existsSync(path.join(testDir, '.dockerignore'))).toBe(true);
   });
 
-  it('should not create Docker files when includeDocker is false', () => {
-    generateProject({ ...defaultConfig, includeDocker: false }, testDir);
+  it('should not create Docker files when docker addon is not enabled', () => {
+    generateProject({ ...defaultConfig, addons: ['ci'] }, testDir);
 
     expect(fs.existsSync(path.join(testDir, 'Dockerfile'))).toBe(false);
     expect(fs.existsSync(path.join(testDir, 'docker-compose.yml'))).toBe(false);
   });
 
-  it('should create CI workflow when includeCi is true', () => {
+  it('should create CI workflow when ci addon is enabled', () => {
     generateProject(defaultConfig, testDir);
 
     expect(fs.existsSync(path.join(testDir, '.github', 'workflows', 'ci.yml'))).toBe(true);
   });
 
-  it('should not create CI workflow when includeCi is false', () => {
-    generateProject({ ...defaultConfig, includeCi: false }, testDir);
+  it('should not create CI workflow when ci addon is not enabled', () => {
+    generateProject({ ...defaultConfig, addons: [] }, testDir);
 
     expect(fs.existsSync(path.join(testDir, '.github', 'workflows', 'ci.yml'))).toBe(false);
-  });
-
-  it('should create release workflow when includeReleaseWorkflow is true', () => {
-    generateProject(defaultConfig, testDir);
-
-    expect(fs.existsSync(path.join(testDir, '.github', 'workflows', 'release.yml'))).toBe(true);
-  });
-
-  it('should not create release workflow when includeReleaseWorkflow is false', () => {
-    generateProject({ ...defaultConfig, includeReleaseWorkflow: false }, testDir);
-
-    expect(fs.existsSync(path.join(testDir, '.github', 'workflows', 'release.yml'))).toBe(false);
   });
 
   it('should create README.md', () => {
@@ -138,5 +127,17 @@ describe('generator', () => {
 
     expect(pkg.bin['test-project']).toBe('./dist/cli.js');
     expect(pkg.scripts['build:binary']).toContain('test-project');
+  });
+
+  it('should create security files when security addon is enabled', () => {
+    generateProject(defaultConfig, testDir);
+
+    expect(fs.existsSync(path.join(testDir, 'trivy.yaml'))).toBe(true);
+  });
+
+  it('should create typedoc config when docs addon is enabled', () => {
+    generateProject(defaultConfig, testDir);
+
+    expect(fs.existsSync(path.join(testDir, 'typedoc.json'))).toBe(true);
   });
 });

@@ -1,0 +1,36 @@
+{
+  "name": "@<%= projectName %>/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/server.ts",
+    "start": "bun run src/server.ts",
+    "build": "bun build src/server.ts --outdir dist --target bun",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+<% if (apiFramework === 'hono') { -%>
+  "dependencies": {
+    "hono": "^4.7.0"<% if (hasAddon('zod')) { %>,
+    "zod": "^3.24.0",
+    "@hono/zod-validator": "^0.4.0"<% } %><% if (hasAddon('convex')) { %>,
+    "convex": "^1.17.0"<% } %>
+  }
+<% } else if (apiFramework === 'express') { -%>
+  "dependencies": {
+    "express": "^5.0.0"<% if (hasAddon('zod')) { %>,
+    "zod": "^3.24.0"<% } %><% if (hasAddon('convex')) { %>,
+    "convex": "^1.17.0"<% } %>
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0"
+  }
+<% } else if (apiFramework === 'elysia') { -%>
+  "dependencies": {
+    "elysia": "^1.2.0"<% if (hasAddon('zod')) { %>,
+    "zod": "^3.24.0"<% } %><% if (hasAddon('convex')) { %>,
+    "convex": "^1.17.0"<% } %>
+  }
+<% } -%>
+}

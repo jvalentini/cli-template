@@ -2,7 +2,59 @@ import { execSync } from 'node:child_process';
 import * as readline from 'node:readline';
 import { blue, bold, cyan, dim, green, red, yellow } from '../utils/colors.js';
 
+/**
+ * Archetype types
+ */
+export type Archetype = 'cli' | 'api' | 'full-stack' | 'effect-cli' | 'effect-full-stack';
+
+/**
+ * API framework choices
+ */
+export type ApiFramework = 'hono' | 'express' | 'elysia';
+
+/**
+ * Web framework choices
+ */
+export type WebFramework = 'react-vite' | 'nextjs' | 'vue' | 'tanstack-start';
+
+/**
+ * Available addons
+ */
+export type Addon =
+  | 'docker'
+  | 'ci'
+  | 'release'
+  | 'dependabot'
+  | 'docs'
+  | 'security'
+  | 'zod'
+  | 'neverthrow'
+  | 'convex'
+  | 'tanstack-query'
+  | 'tanstack-router'
+  | 'tanstack-form';
+
 export interface ProjectConfig {
+  // Core project info
+  projectName: string;
+  description: string;
+  author: string;
+  license: 'MIT' | 'Apache-2.0' | 'ISC' | 'GPL-3.0' | 'BSD-3-Clause';
+  githubUsername: string;
+
+  // Archetype selection
+  archetype: Archetype;
+  apiFramework: ApiFramework | undefined;
+  webFramework: WebFramework | undefined;
+
+  // Addons (replaces individual boolean flags)
+  addons: Addon[];
+}
+
+/**
+ * Legacy config for backward compatibility during migration
+ */
+export interface LegacyProjectConfig {
   projectName: string;
   description: string;
   author: string;
@@ -131,28 +183,116 @@ async function promptConfirm(prompt: string, defaultValue = true): Promise<boole
   return answer.toLowerCase().startsWith('y');
 }
 
+async function promptMultiSelect<T extends string>(
+  prompt: string,
+  options: { value: T; label: string; default?: boolean }[]
+): Promise<T[]> {
+  console.error(`\n${prompt}`);
+  console.error(dim('  (Enter numbers separated by commas, or press Enter for defaults)\n'));
+
+  options.forEach((opt, i) => {
+    const marker = opt.default ? green('✓') : ' ';
+    console.error(`  ${marker} ${i + 1}. ${opt.label}`);
+  });
+
+  const defaults = options.filter((o) => o.default).map((o) => o.value);
+
+  while (true) {
+    const answer = await question(
+      `${dim('Enter numbers')} [${options
+        .map((_, i) => (options[i]?.default ? i + 1 : ''))
+        .filter(Boolean)
+        .join(',')}]: `
+    );
+
+    if (!answer) return defaults;
+
+    const nums = answer.split(',').map((s) => parseInt(s.trim(), 10));
+    const valid = nums.every((n) => n >= 1 && n <= options.length);
+
+    if (valid) {
+      return nums.map((n) => options[n - 1]?.value).filter((v): v is T => v !== undefined);
+    }
+
+    console.error(
+      red(`  Please enter numbers between 1 and ${options.length}, separated by commas`)
+    );
+  }
+}
+
 export async function runPrompts(): Promise<ProjectConfig> {
-  console.error(`\n${bold(cyan('🚀 CLI Template Wizard'))}\n`);
-  console.error(dim('Create a new CLI project with modern TypeScript tooling.\n'));
+  console.error(`\n${bold(cyan('🥐 Bakery'))}\n`);
+  console.error(dim('Bake fresh projects from recipes.\n'));
   console.error(dim('Press Ctrl+C to cancel at any time.\n'));
+
+  // Step 1: Select archetype
+  const archetype = await promptSelect<Archetype>(
+    bold(blue('🏗️  Project Type')),
+    [
+      { value: 'cli', label: 'CLI Tool - Command-line applications' },
+      { value: 'api', label: 'REST API - Backend with Hono/Express/Elysia' },
+      { value: 'full-stack', label: 'Full-Stack - Monorepo with API + Web' },
+      { value: 'effect-cli', label: 'Effect CLI/API - Effect-ts patterns' },
+      { value: 'effect-full-stack', label: 'Effect Full-Stack - Effect + Convex + TanStack' },
+    ],
+    0
+  );
+
+  // Step 2: Framework selection (based on archetype)
+  let apiFramework: ApiFramework | undefined;
+  let webFramework: WebFramework | undefined;
+
+  if (archetype === 'api' || archetype === 'full-stack') {
+    apiFramework = await promptSelect<ApiFramework>(
+      bold(blue('🔧 API Framework')),
+      [
+        { value: 'hono', label: 'Hono - Lightweight, fast, great with Bun' },
+        { value: 'express', label: 'Express - Battle-tested, huge ecosystem' },
+        { value: 'elysia', label: 'Elysia - Bun-native, TypeScript-first' },
+      ],
+      0
+    );
+  }
+
+  if (archetype === 'full-stack') {
+    webFramework = await promptSelect<WebFramework>(
+      bold(blue('🌐 Web Framework')),
+      [
+        { value: 'react-vite', label: 'React (Vite) - Fast builds, popular' },
+        { value: 'nextjs', label: 'Next.js - Full-stack React with SSR' },
+        { value: 'vue', label: 'Vue - Progressive framework' },
+        { value: 'tanstack-start', label: 'TanStack Start - Type-safe full-stack' },
+      ],
+      0
+    );
+  }
+
+  // Effect full-stack has fixed choices
+  if (archetype === 'effect-full-stack') {
+    webFramework = 'tanstack-start';
+  }
 
   // Detect user info
   const gitUser = detectGitUser();
   const detectedGithubUsername = detectGithubUsername();
 
-  console.error(`${bold(blue('📦 Project Details'))}\n`);
+  console.error(`\n${bold(blue('📦 Project Details'))}\n`);
 
-  const rawName = await promptRequired('Project name (e.g., my-awesome-cli)', validateProjectName);
+  const rawName = await promptRequired('Project name (e.g., my-awesome-app)', validateProjectName);
   const projectName = toKebabCase(rawName);
 
   if (projectName !== rawName) {
     console.error(dim(`  → Using: ${projectName}`));
   }
 
-  const description = await promptWithDefault(
-    'Description',
-    `A CLI tool built with TypeScript and Bun`
-  );
+  const defaultDescription =
+    archetype === 'cli'
+      ? 'A CLI tool built with TypeScript and Bun'
+      : archetype === 'api'
+        ? 'A REST API built with TypeScript and Bun'
+        : 'A full-stack application built with TypeScript';
+
+  const description = await promptWithDefault('Description', defaultDescription);
 
   const author = await promptWithDefault('Author name', gitUser.name || '');
 
@@ -170,34 +310,64 @@ export async function runPrompts(): Promise<ProjectConfig> {
     0
   );
 
-  console.error(`\n${bold(blue('🛠️  Features'))}\n`);
+  // Step 3: Addon selection
+  const addonOptions: { value: Addon; label: string; default?: boolean }[] = [
+    { value: 'docker', label: 'Docker - Containerized development', default: true },
+    { value: 'ci', label: 'GitHub Actions CI - Automated testing', default: true },
+    { value: 'docs', label: 'TypeDoc - API documentation', default: true },
+    { value: 'security', label: 'Trivy - Security scanning', default: true },
+  ];
 
-  const includeDocker = await promptConfirm('Include Docker support?', true);
-  const includeCi = await promptConfirm('Include GitHub Actions CI?', true);
-  const includeReleaseWorkflow = includeCi
-    ? await promptConfirm('Include release workflow (auto-build binaries)?', true)
-    : false;
-  const includeDependabot = includeCi
-    ? await promptConfirm('Include Dependabot (automated dependency updates)?', true)
-    : false;
-  const includeDocs = await promptConfirm('Include TypeDoc (API documentation)?', true);
-  const includeSecurity = await promptConfirm('Include Trivy (security scanning)?', true);
+  // Add archetype-specific addons
+  if (archetype === 'cli') {
+    addonOptions.push({
+      value: 'release',
+      label: 'Release workflow - Auto-build binaries',
+      default: true,
+    });
+  }
 
-  console.error(`\n${bold(blue('🔒 Type Safety'))}\n`);
+  if (archetype !== 'effect-cli' && archetype !== 'effect-full-stack') {
+    addonOptions.push(
+      { value: 'zod', label: 'Zod - Runtime type validation', default: true },
+      { value: 'neverthrow', label: 'neverthrow - Type-safe error handling', default: false }
+    );
+  }
 
-  const includeStrictestConfig = await promptConfirm(
-    'Use @tsconfig/strictest (maximum type safety)?',
-    true
-  );
-  const includeZod = await promptConfirm('Include Zod (runtime type validation)?', true);
-  const includeNeverthrow = await promptConfirm(
-    'Include neverthrow (type-safe error handling)?',
-    true
-  );
-  const includePackageValidation = await promptConfirm(
-    'Include publint + attw (package validation)?',
-    true
-  );
+  // TanStack addons for web projects
+  if (archetype === 'full-stack' && webFramework !== 'nextjs') {
+    addonOptions.push(
+      { value: 'tanstack-query', label: 'TanStack Query - Data fetching', default: true },
+      { value: 'tanstack-router', label: 'TanStack Router - Type-safe routing', default: false },
+      { value: 'tanstack-form', label: 'TanStack Form - Form management', default: false }
+    );
+  }
+
+  // Convex for API/full-stack
+  if (archetype === 'api' || archetype === 'full-stack') {
+    addonOptions.push({ value: 'convex', label: 'Convex - Real-time database', default: false });
+  }
+
+  // Effect full-stack always includes convex
+  if (archetype === 'effect-full-stack') {
+    addonOptions.push(
+      { value: 'convex', label: 'Convex - Real-time database', default: true },
+      { value: 'tanstack-query', label: 'TanStack Query - Data fetching', default: true }
+    );
+  }
+
+  const addons = await promptMultiSelect<Addon>(bold(blue('🛠️  Addons')), addonOptions);
+
+  // Add dependabot if CI is selected
+  if (addons.includes('ci')) {
+    const includeDependabot = await promptConfirm(
+      'Include Dependabot (automated dependency updates)?',
+      true
+    );
+    if (includeDependabot) {
+      addons.push('dependabot');
+    }
+  }
 
   console.error(`\n${bold(green('✓ Configuration complete!'))}\n`);
 
@@ -207,16 +377,10 @@ export async function runPrompts(): Promise<ProjectConfig> {
     author,
     license,
     githubUsername,
-    includeDocker,
-    includeCi,
-    includeReleaseWorkflow,
-    includeDocs,
-    includeSecurity,
-    includeDependabot,
-    includeZod,
-    includeNeverthrow,
-    includePackageValidation,
-    includeStrictestConfig,
+    archetype,
+    apiFramework,
+    webFramework,
+    addons,
   };
 }
 
@@ -224,35 +388,58 @@ export function closePrompts(): void {
   rl.close();
 }
 
+const archetypeLabels: Record<Archetype, string> = {
+  cli: 'CLI Tool',
+  api: 'REST API',
+  'full-stack': 'Full-Stack',
+  'effect-cli': 'Effect CLI/API',
+  'effect-full-stack': 'Effect Full-Stack',
+};
+
+const frameworkLabels: Record<string, string> = {
+  hono: 'Hono',
+  express: 'Express',
+  elysia: 'Elysia',
+  'react-vite': 'React (Vite)',
+  nextjs: 'Next.js',
+  vue: 'Vue',
+  'tanstack-start': 'TanStack Start',
+};
+
 export function printSummary(config: ProjectConfig, outputDir: string): void {
   console.error(bold(cyan('\n📋 Summary\n')));
   console.error(`  ${dim('Project:')}     ${config.projectName}`);
+  console.error(`  ${dim('Type:')}        ${archetypeLabels[config.archetype]}`);
+  if (config.apiFramework) {
+    console.error(`  ${dim('API:')}         ${frameworkLabels[config.apiFramework]}`);
+  }
+  if (config.webFramework) {
+    console.error(`  ${dim('Web:')}         ${frameworkLabels[config.webFramework]}`);
+  }
   console.error(`  ${dim('Description:')} ${config.description}`);
   if (config.author) console.error(`  ${dim('Author:')}      ${config.author}`);
   if (config.githubUsername) console.error(`  ${dim('GitHub:')}      ${config.githubUsername}`);
   console.error(`  ${dim('License:')}     ${config.license}`);
-  console.error(`  ${dim('Docker:')}      ${config.includeDocker ? green('Yes') : yellow('No')}`);
-  console.error(`  ${dim('CI:')}          ${config.includeCi ? green('Yes') : yellow('No')}`);
-  if (config.includeCi) {
+
+  console.error(bold(cyan('\n🛠️  Addons\n')));
+  const hasAddon = (addon: Addon) => config.addons.includes(addon);
+  console.error(`  ${dim('Docker:')}      ${hasAddon('docker') ? green('Yes') : yellow('No')}`);
+  console.error(`  ${dim('CI:')}          ${hasAddon('ci') ? green('Yes') : yellow('No')}`);
+  if (hasAddon('ci')) {
+    console.error(`  ${dim('Release:')}     ${hasAddon('release') ? green('Yes') : yellow('No')}`);
     console.error(
-      `  ${dim('Release:')}     ${config.includeReleaseWorkflow ? green('Yes') : yellow('No')}`
-    );
-    console.error(
-      `  ${dim('Dependabot:')}  ${config.includeDependabot ? green('Yes') : yellow('No')}`
+      `  ${dim('Dependabot:')}  ${hasAddon('dependabot') ? green('Yes') : yellow('No')}`
     );
   }
-  console.error(`  ${dim('Docs:')}        ${config.includeDocs ? green('Yes') : yellow('No')}`);
-  console.error(`  ${dim('Security:')}    ${config.includeSecurity ? green('Yes') : yellow('No')}`);
-  console.error(bold(cyan('\n🔒 Type Safety\n')));
-  console.error(
-    `  ${dim('Strictest:')}   ${config.includeStrictestConfig ? green('Yes') : yellow('No')}`
-  );
-  console.error(`  ${dim('Zod:')}         ${config.includeZod ? green('Yes') : yellow('No')}`);
-  console.error(
-    `  ${dim('neverthrow:')}  ${config.includeNeverthrow ? green('Yes') : yellow('No')}`
-  );
-  console.error(
-    `  ${dim('Pkg Valid:')}   ${config.includePackageValidation ? green('Yes') : yellow('No')}`
-  );
+  console.error(`  ${dim('Docs:')}        ${hasAddon('docs') ? green('Yes') : yellow('No')}`);
+  console.error(`  ${dim('Security:')}    ${hasAddon('security') ? green('Yes') : yellow('No')}`);
+  console.error(`  ${dim('Zod:')}         ${hasAddon('zod') ? green('Yes') : yellow('No')}`);
+  console.error(`  ${dim('neverthrow:')}  ${hasAddon('neverthrow') ? green('Yes') : yellow('No')}`);
+  if (hasAddon('convex')) {
+    console.error(`  ${dim('Convex:')}      ${green('Yes')}`);
+  }
+  if (hasAddon('tanstack-query')) {
+    console.error(`  ${dim('TanStack Q:')}  ${green('Yes')}`);
+  }
   console.error(`\n  ${dim('Output:')}      ${outputDir}`);
 }

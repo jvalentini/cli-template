@@ -1,0 +1,8 @@
+{
+  "name": "docker",
+  "displayName": "Docker",
+  "description": "Containerized development and deployment",
+  "version": "1.0.0",
+  "type": "addon",
+  "files": ["Dockerfile.ejs", "docker-compose.yml.ejs", ".dockerignore.ejs"]
+}

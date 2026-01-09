@@ -1,0 +1,8 @@
+{
+  "name": "ci",
+  "displayName": "GitHub Actions CI",
+  "description": "Automated testing and continuous integration",
+  "version": "1.0.0",
+  "type": "addon",
+  "files": [".github/workflows/ci.yml.ejs"]
+}

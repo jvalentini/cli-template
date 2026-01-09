@@ -1,0 +1,31 @@
+{
+  "name": "full-stack",
+  "displayName": "Full-Stack",
+  "description": "Monorepo with API backend and web frontend using Bun workspaces",
+  "version": "1.0.0",
+  "dependencies": ["core"],
+  "prompts": [
+    {
+      "name": "apiFramework",
+      "type": "select",
+      "message": "Which API framework?",
+      "options": [
+        { "value": "hono", "label": "Hono - Lightweight, fast, great with Bun" },
+        { "value": "express", "label": "Express - Battle-tested, huge ecosystem" },
+        { "value": "elysia", "label": "Elysia - Bun-native, TypeScript-first" }
+      ]
+    },
+    {
+      "name": "webFramework",
+      "type": "select",
+      "message": "Which web framework?",
+      "options": [
+        { "value": "react-vite", "label": "React (Vite) - Fast builds, popular" },
+        { "value": "nextjs", "label": "Next.js - Full-stack React with SSR" },
+        { "value": "vue", "label": "Vue - Progressive framework" },
+        { "value": "tanstack-start", "label": "TanStack Start - Type-safe full-stack" }
+      ]
+    }
+  ],
+  "exclude": []
+}

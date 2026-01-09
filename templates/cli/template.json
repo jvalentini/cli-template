@@ -1,0 +1,9 @@
+{
+  "name": "cli",
+  "displayName": "CLI Tool",
+  "description": "Command-line application with argument parsing and cross-platform binary builds",
+  "version": "1.0.0",
+  "dependencies": ["core"],
+  "prompts": [],
+  "exclude": []
+}

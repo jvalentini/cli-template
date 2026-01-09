@@ -1,0 +1,9 @@
+{
+  "name": "core",
+  "displayName": "Core Tooling",
+  "description": "Shared tooling and configuration included in all projects",
+  "version": "1.0.0",
+  "dependencies": [],
+  "prompts": [],
+  "exclude": []
+}

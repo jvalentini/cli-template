@@ -1,0 +1,90 @@
+# <%= projectName %>
+
+<%= description %>
+
+A full-stack monorepo with **<%= apiFramework %>** backend and **<%= webFramework %>** frontend.
+
+## Project Structure
+
+```
+<%= projectName %>/
+├── packages/
+│   ├── api/          # Backend API (<%= apiFramework %>)
+│   └── web/          # Frontend (<%= webFramework %>)
+├── package.json      # Root workspace config
+└── README.md
+```
+
+## Getting Started
+
+```bash
+# Install all dependencies
+bun install
+
+# Run both API and web in development
+bun run dev
+
+# Or run individually
+bun run dev:api
+bun run dev:web
+```
+
+## Available Scripts
+
+```bash
+bun run dev          # Start all packages in dev mode
+bun run build        # Build all packages
+bun run test         # Run all tests
+bun run typecheck    # Type check all packages
+bun run lint         # Lint all packages
+bun run check        # Run all checks (typecheck + lint + test)
+```
+
+## Packages
+
+### @<%= projectName %>/api
+
+Backend API built with <%= apiFramework %>.
+
+- Port: `3001` (default)
+- Endpoints:
+  - `GET /health` - Health check
+  - `GET /api` - API info
+  - `POST /api/messages` - Create message
+
+### @<%= projectName %>/web
+
+Frontend built with <%= webFramework %>.
+
+- Port: `5173` (Vite) or `3000` (Next.js)
+- Connects to API at `http://localhost:3001`
+<% if (hasAddon('docker')) { %>
+## Docker
+
+```bash
+# Build images
+docker-compose build
+
+# Run containers
+docker-compose up
+```
+<% } %>
+<% if (hasAddon('docs')) { %>
+## Documentation
+
+```bash
+make docs        # Generate API docs
+make docs-serve  # Serve docs locally
+```
+<% } %>
+<% if (hasAddon('security')) { %>
+## Security
+
+```bash
+make security    # Scan for vulnerabilities
+make audit       # Audit dependencies
+```
+<% } %>
+## License
+
+<%= license %><% if (author) { %> - <%= author %><% } %>

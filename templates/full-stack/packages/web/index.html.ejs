@@ -1,0 +1,18 @@
+<% if (webFramework === 'react-vite' || webFramework === 'vue' || webFramework === 'tanstack-start') { -%>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= projectName %></title>
+  </head>
+  <body>
+    <div id="root"></div>
+<% if (webFramework === 'vue') { -%>
+    <script type="module" src="/src/main.ts"></script>
+<% } else { -%>
+    <script type="module" src="/src/main.tsx"></script>
+<% } -%>
+  </body>
+</html>
+<% } -%>

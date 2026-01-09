@@ -1,0 +1,54 @@
+# <%= projectName %>
+
+<%= description %>
+
+## Installation
+
+```bash
+bun install
+```
+
+## Usage
+
+```bash
+# Run in development
+bun run src/cli.ts --help
+
+# Or use make
+make dev
+```
+
+## Development
+
+```bash
+make install     # Install dependencies
+make check       # Run all checks
+make test        # Run tests
+make build       # Build to dist/
+```
+<% if (hasAddon('docs')) { %>
+## Documentation
+
+```bash
+make docs        # Generate API docs
+make docs-serve  # Serve docs locally
+```
+<% } %>
+<% if (hasAddon('security')) { %>
+## Security
+
+```bash
+make security    # Scan for vulnerabilities
+make audit       # Audit dependencies
+```
+<% } %>
+## Building Binaries
+
+```bash
+make build-binary  # Build for current platform
+make build-all     # Build for all platforms
+```
+
+## License
+
+<%= license %><% if (author) { %> - <%= author %><% } %>

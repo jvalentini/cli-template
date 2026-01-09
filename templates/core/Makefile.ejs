@@ -1,0 +1,162 @@
+VERSION := $(shell node -p "require('./package.json').version")
+BUILD_DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+VCS_REF := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+
+.DEFAULT_GOAL := help
+
+.PHONY: help
+help:
+	@echo "=========================================="
+	@echo "<%= projectName %> - Commands"
+	@echo "=========================================="
+	@echo ""
+	@echo "SETUP:"
+	@echo "  make install        - Install dependencies"
+	@echo ""
+	@echo "DEVELOPMENT:"
+	@echo "  make dev            - Run in development mode"
+	@echo ""
+	@echo "LINTING:"
+	@echo "  make lint           - Run biome + oxlint + knip with auto-fix"
+	@echo "  make type-check     - Run TypeScript type checking"
+	@echo ""
+	@echo "TESTING:"
+	@echo "  make test           - Run tests"
+	@echo "  make test-watch     - Watch mode"
+	@echo "  make test-coverage  - With coverage"
+<% if (hasAddon('docs')) { %>
+	@echo ""
+	@echo "DOCUMENTATION:"
+	@echo "  make docs           - Generate API documentation"
+	@echo "  make docs-watch     - Generate docs in watch mode"
+	@echo "  make docs-serve     - Serve docs locally"
+<% } %>
+<% if (hasAddon('security')) { %>
+	@echo ""
+	@echo "SECURITY:"
+	@echo "  make security       - Run security scan (Trivy)"
+	@echo "  make security-fix   - Show security fixes"
+	@echo "  make audit          - Run npm audit"
+<% } %>
+	@echo ""
+	@echo "BUILD:"
+	@echo "  make build          - Build to dist/"
+<% if (archetype === 'cli') { %>
+	@echo "  make build-binary   - Build native binary"
+	@echo "  make build-all      - Build all platforms"
+<% } %>
+
+.PHONY: install
+install:
+	@bun install
+
+.PHONY: dev
+dev:
+<% if (archetype === 'cli') { %>
+	@bun run src/cli.ts --help
+<% } else if (archetype === 'api') { %>
+	@bun run --watch src/server.ts
+<% } else { %>
+	@bun run dev
+<% } %>
+
+.PHONY: lint
+lint:
+	@bun run lint:fix
+	@bunx oxlint --fix .
+	@echo ""
+	@echo "Checking for unused code..."
+	@-bunx knip --no-exit-code
+
+.PHONY: lint-fix
+lint-fix:
+	@bun run lint:fix
+	@bun run oxlint
+
+.PHONY: lint-fix-all
+lint-fix-all:
+	@bun run lint:fix --unsafe
+	@bun run oxlint
+
+.PHONY: format
+format:
+	@bun run format
+
+.PHONY: oxlint
+oxlint:
+	@bun run oxlint
+
+.PHONY: typecheck
+typecheck:
+	@bun run typecheck
+
+.PHONY: check
+check:
+	@bun run check
+
+.PHONY: test
+test:
+	@bun test
+
+.PHONY: test-watch
+test-watch:
+	@bun test --watch
+
+.PHONY: test-coverage
+test-coverage:
+	@bun test --coverage
+<% if (hasAddon('docs')) { %>
+
+.PHONY: docs
+docs:
+	@echo "Generating API documentation..."
+	@bunx typedoc
+	@echo "Documentation generated in docs/"
+
+.PHONY: docs-watch
+docs-watch:
+	@bun run docs:watch
+
+.PHONY: docs-serve
+docs-serve:
+	@cd docs && python3 -m http.server 8080
+<% } %>
+<% if (hasAddon('security')) { %>
+
+.PHONY: security
+security:
+	@echo "Scanning for vulnerabilities..."
+	@mise exec -- trivy fs --config trivy.yaml --scanners vuln --severity HIGH,CRITICAL .
+
+.PHONY: security-fix
+security-fix:
+	@command -v trivy >/dev/null 2>&1 || { echo "Trivy not installed. Install: brew install trivy"; exit 1; }
+	@trivy fs --config trivy.yaml --format table .
+
+.PHONY: audit
+audit:
+	@bun pm audit 2>/dev/null || echo "No audit available for bun, checking with npm..."
+	@npm audit --audit-level=moderate 2>/dev/null || true
+<% } %>
+
+.PHONY: build
+build:
+	@bun run build
+<% if (archetype === 'cli') { %>
+
+.PHONY: build-binary
+build-binary:
+	@bun build src/cli.ts --compile --outfile <%= projectName %>
+
+.PHONY: build-all
+build-all:
+	@bun run build:binaries
+<% } %>
+
+.PHONY: clean
+clean:
+	@rm -rf node_modules dist coverage docs bun.lockb <%= projectName %>-*
+
+.PHONY: version
+version:
+	@echo "Version: $(VERSION)"

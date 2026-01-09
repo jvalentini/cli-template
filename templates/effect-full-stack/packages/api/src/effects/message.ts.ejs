@@ -1,0 +1,41 @@
+import { Context, Effect, Layer, Schema } from 'effect';
+import type { Id } from '../../convex/_generated/dataModel';
+
+// Message schema using Effect Schema
+export const MessageSchema = Schema.Struct({
+  _id: Schema.String,
+  text: Schema.String,
+  author: Schema.String,
+  createdAt: Schema.Number,
+});
+
+export type Message = Schema.Schema.Type<typeof MessageSchema>;
+
+// Create message input schema
+export const CreateMessageSchema = Schema.Struct({
+  text: Schema.String.pipe(Schema.minLength(1)),
+  author: Schema.String.pipe(Schema.minLength(1)),
+});
+
+export type CreateMessageInput = Schema.Schema.Type<typeof CreateMessageSchema>;
+
+// Message service definition
+export class MessageService extends Context.Tag('MessageService')<
+  MessageService,
+  {
+    readonly validate: (input: unknown) => Effect.Effect<CreateMessageInput, Schema.ParseError>;
+    readonly formatMessage: (message: Message) => Effect.Effect<string>;
+  }
+>() {}
+
+// Message service implementation
+export const MessageServiceLive = Layer.succeed(
+  MessageService,
+  MessageService.of({
+    validate: (input) =>
+      Schema.decodeUnknown(CreateMessageSchema)(input),
+
+    formatMessage: (message) =>
+      Effect.succeed(`[${new Date(message.createdAt).toISOString()}] ${message.author}: ${message.text}`),
+  })
+);

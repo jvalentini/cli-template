@@ -1,0 +1,150 @@
+<% if (webFramework === 'react-vite' || webFramework === 'tanstack-start') { -%>
+<% if (hasAddon('tanstack-query')) { -%>
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+<% } -%>
+import { useState } from 'react';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+<% if (hasAddon('tanstack-query')) { -%>
+interface Message {
+  id: string;
+  text: string;
+  createdAt: string;
+}
+
+function useMessages() {
+  return useQuery({
+    queryKey: ['messages'],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/api/messages`);
+      return res.json() as Promise<Message[]>;
+    },
+  });
+}
+
+function useCreateMessage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (text: string) => {
+      const res = await fetch(`${API_URL}/api/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      return res.json() as Promise<Message>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+    },
+  });
+}
+<% } -%>
+
+export function App() {
+  const [inputText, setInputText] = useState('');
+<% if (hasAddon('tanstack-query')) { -%>
+  const { data: messages, isLoading } = useMessages();
+  const createMessage = useCreateMessage();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inputText.trim()) {
+      createMessage.mutate(inputText);
+      setInputText('');
+    }
+  };
+<% } -%>
+
+  return (
+    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+      <h1><%= projectName %></h1>
+      <p><%= description %></p>
+
+<% if (hasAddon('tanstack-query')) { -%>
+      <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
+        <input
+          type="text"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder="Enter a message..."
+          style={{ padding: '0.5rem', width: '70%' }}
+        />
+        <button
+          type="submit"
+          disabled={createMessage.isPending}
+          style={{ padding: '0.5rem 1rem', marginLeft: '0.5rem' }}
+        >
+          {createMessage.isPending ? 'Sending...' : 'Send'}
+        </button>
+      </form>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h2>Messages</h2>
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : messages?.length ? (
+          <ul>
+            {messages.map((msg) => (
+              <li key={msg.id}>{msg.text}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No messages yet</p>
+        )}
+      </div>
+<% } else { -%>
+      <div style={{ marginTop: '2rem' }}>
+        <h2>Getting Started</h2>
+        <p>Edit this file to start building your app.</p>
+        <p>API URL: {API_URL}</p>
+      </div>
+<% } -%>
+    </div>
+  );
+}
+<% } else if (webFramework === 'nextjs') { -%>
+'use client';
+
+import { useState, useEffect } from 'react';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+interface ApiInfo {
+  message: string;
+}
+
+export default function App() {
+  const [apiInfo, setApiInfo] = useState<ApiInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api`)
+      .then((res) => res.json())
+      .then((data) => {
+        setApiInfo(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  return (
+    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+      <h1><%= projectName %></h1>
+      <p><%= description %></p>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h2>API Status</h2>
+        {loading ? (
+          <p>Loading...</p>
+        ) : apiInfo ? (
+          <p>{apiInfo.message}</p>
+        ) : (
+          <p>Failed to connect to API</p>
+        )}
+      </div>
+    </div>
+  );
+}
+<% } -%>

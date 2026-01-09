@@ -31,11 +31,11 @@ interface ParsedCli {
 
 function printHelp(): void {
   console.log(`
-${bold(cyan('cli-template'))} v${VERSION}
-${dim('Create new CLI projects with modern TypeScript tooling')}
+${bold(cyan('bakery'))} v${VERSION}
+${dim('Bake fresh projects from recipes - a modular project scaffolder')}
 
 ${bold('USAGE:')}
-  cli-template [options] [output-directory]
+  bakery [options] [output-directory]
 
 ${bold('OPTIONS:')}
   -o, --output <dir>   Output directory (default: ./<project-name>)
@@ -44,22 +44,23 @@ ${bold('OPTIONS:')}
 
 ${bold('EXAMPLES:')}
   ${dim('# Run interactive wizard')}
-  cli-template
+  bakery
 
   ${dim('# Create project in specific directory')}
-  cli-template -o ./my-project
+  bakery -o ./my-project
 
-  ${dim('# Quick install via curl')}
-  curl -fsSL https://raw.githubusercontent.com/username/cli-template/main/install.sh | bash
+${bold('ARCHETYPES:')}
+  ${green('•')} CLI Tool - Command-line applications
+  ${green('•')} REST API - Backend with Hono/Express/Elysia
+  ${green('•')} Full-Stack - Monorepo with API + Web
+  ${green('•')} Effect CLI/API - Effect-ts patterns
+  ${green('•')} Effect Full-Stack - Effect + Convex + TanStack
 
-${bold('WHAT YOU GET:')}
+${bold('INCLUDED IN ALL PROJECTS:')}
   ${green('✓')} TypeScript + Bun runtime
   ${green('✓')} Biome (linting + formatting)
   ${green('✓')} Oxlint (supplementary linting)
   ${green('✓')} Lefthook (git hooks)
-  ${green('✓')} GitHub Actions CI/CD
-  ${green('✓')} Docker support
-  ${green('✓')} Cross-platform binary builds
   ${green('✓')} Makefile for common tasks
 `);
 }
@@ -156,7 +157,7 @@ async function main(): Promise<void> {
   } catch (err) {
     if (err instanceof CliParseError) {
       console.error(error(err.message));
-      console.error('Run "cli-template --help" for usage information');
+      console.error('Run "bakery --help" for usage information');
       process.exit(1);
     }
 

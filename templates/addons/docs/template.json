@@ -1,0 +1,8 @@
+{
+  "name": "docs",
+  "displayName": "TypeDoc",
+  "description": "API documentation generation",
+  "version": "1.0.0",
+  "type": "addon",
+  "files": ["typedoc.json.ejs"]
+}

@@ -13,7 +13,7 @@ Run one command, answer a few questions, and get a production-ready project with
 ### One-liner (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jvalentini/bakery/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/jvalentini/bakery/master/install.sh | bash
 ```
 
 This downloads and runs the interactive wizard directly. No permanent installation required.

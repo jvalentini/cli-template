@@ -1,0 +1,8 @@
+{
+  "name": "tanstack-query",
+  "displayName": "TanStack Query",
+  "description": "Powerful data fetching and caching for React/Vue",
+  "version": "1.0.0",
+  "type": "addon",
+  "files": ["src/lib/query-client.ts.ejs", "src/hooks/use-api.ts.ejs"]
+}

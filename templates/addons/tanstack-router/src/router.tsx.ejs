@@ -1,0 +1,69 @@
+<% if (webFramework === 'react-vite') { -%>
+import { createRouter, createRootRoute, createRoute } from '@tanstack/react-router';
+import { TanStackRouterDevtools } from '@tanstack/router-devtools';
+import { Outlet, Link } from '@tanstack/react-router';
+
+/**
+ * Root layout component
+ */
+function RootLayout() {
+  return (
+    <>
+      <nav style={{ padding: '1rem', borderBottom: '1px solid #eee' }}>
+        <Link to="/" style={{ marginRight: '1rem' }}>
+          Home
+        </Link>
+        <Link to="/about">About</Link>
+      </nav>
+      <main>
+        <Outlet />
+      </main>
+      {import.meta.env.DEV && <TanStackRouterDevtools />}
+    </>
+  );
+}
+
+/**
+ * Root route definition
+ */
+const rootRoute = createRootRoute({
+  component: RootLayout,
+});
+
+/**
+ * Home page route
+ */
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: () => import('./routes/index.js').then((m) => <m.default />),
+});
+
+/**
+ * About page route
+ */
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: () => import('./routes/about.js').then((m) => <m.default />),
+});
+
+/**
+ * Route tree
+ */
+const routeTree = rootRoute.addChildren([indexRoute, aboutRoute]);
+
+/**
+ * Create and export router instance
+ */
+export const router = createRouter({ routeTree });
+
+/**
+ * Register router types for type-safe navigation
+ */
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}
+<% } -%>

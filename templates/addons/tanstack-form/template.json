@@ -1,0 +1,8 @@
+{
+  "name": "tanstack-form",
+  "displayName": "TanStack Form",
+  "description": "Type-safe form state management for React/Vue",
+  "version": "1.0.0",
+  "type": "addon",
+  "files": ["src/components/ContactForm.tsx.ejs", "src/lib/form-utils.ts.ejs"]
+}

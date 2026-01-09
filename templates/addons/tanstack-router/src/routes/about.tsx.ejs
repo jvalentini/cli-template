@@ -1,0 +1,20 @@
+<% if (webFramework === 'react-vite') { -%>
+export default function AboutPage() {
+  return (
+    <div style={{ padding: '2rem' }}>
+      <h1>About</h1>
+      <p>This is the about page.</p>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h2>Technology Stack</h2>
+        <ul>
+          <li>React 19</li>
+          <li>TanStack Router</li>
+          <li>TypeScript</li>
+          <li>Vite</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+<% } -%>

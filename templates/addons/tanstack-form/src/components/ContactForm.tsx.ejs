@@ -1,0 +1,153 @@
+<% if (webFramework === 'react-vite' || webFramework === 'tanstack-start') { -%>
+import { useForm } from '@tanstack/react-form';
+<% if (hasAddon('zod')) { -%>
+import { zodValidator } from '@tanstack/zod-form-adapter';
+import { contactFormSchema, type ContactFormData } from '../lib/form-utils.js';
+<% } -%>
+
+interface ContactFormProps {
+  onSubmit: (data: { name: string; email: string; message: string }) => void;
+}
+
+export function ContactForm({ onSubmit }: ContactFormProps) {
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+      message: '',
+    },
+<% if (hasAddon('zod')) { -%>
+    validatorAdapter: zodValidator(),
+    validators: {
+      onChange: contactFormSchema,
+    },
+<% } -%>
+    onSubmit: async ({ value }) => {
+      onSubmit(value);
+    },
+  });
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '400px' }}
+    >
+      <div>
+        <form.Field
+          name="name"
+<% if (!hasAddon('zod')) { -%>
+          validators={{
+            onChange: ({ value }) =>
+              value.trim() ? undefined : 'Name is required',
+          }}
+<% } -%>
+        >
+          {(field) => (
+            <>
+              <label htmlFor={field.name}>Name</label>
+              <input
+                id={field.name}
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                style={{ width: '100%', padding: '0.5rem' }}
+              />
+              {field.state.meta.errors?.length > 0 && (
+                <span style={{ color: 'red', fontSize: '0.875rem' }}>
+                  {field.state.meta.errors.join(', ')}
+                </span>
+              )}
+            </>
+          )}
+        </form.Field>
+      </div>
+
+      <div>
+        <form.Field
+          name="email"
+<% if (!hasAddon('zod')) { -%>
+          validators={{
+            onChange: ({ value }) => {
+              if (!value.trim()) return 'Email is required';
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email';
+              return undefined;
+            },
+          }}
+<% } -%>
+        >
+          {(field) => (
+            <>
+              <label htmlFor={field.name}>Email</label>
+              <input
+                id={field.name}
+                name={field.name}
+                type="email"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                style={{ width: '100%', padding: '0.5rem' }}
+              />
+              {field.state.meta.errors?.length > 0 && (
+                <span style={{ color: 'red', fontSize: '0.875rem' }}>
+                  {field.state.meta.errors.join(', ')}
+                </span>
+              )}
+            </>
+          )}
+        </form.Field>
+      </div>
+
+      <div>
+        <form.Field
+          name="message"
+<% if (!hasAddon('zod')) { -%>
+          validators={{
+            onChange: ({ value }) =>
+              value.length >= 10 ? undefined : 'Message must be at least 10 characters',
+          }}
+<% } -%>
+        >
+          {(field) => (
+            <>
+              <label htmlFor={field.name}>Message</label>
+              <textarea
+                id={field.name}
+                name={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                rows={4}
+                style={{ width: '100%', padding: '0.5rem' }}
+              />
+              {field.state.meta.errors?.length > 0 && (
+                <span style={{ color: 'red', fontSize: '0.875rem' }}>
+                  {field.state.meta.errors.join(', ')}
+                </span>
+              )}
+            </>
+          )}
+        </form.Field>
+      </div>
+
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <button
+            type="submit"
+            disabled={!canSubmit || isSubmitting}
+            style={{ padding: '0.75rem', cursor: canSubmit ? 'pointer' : 'not-allowed' }}
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit'}
+          </button>
+        )}
+      </form.Subscribe>
+    </form>
+  );
+}
+<% } -%>

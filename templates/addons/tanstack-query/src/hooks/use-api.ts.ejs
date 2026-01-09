@@ -1,0 +1,98 @@
+<% if (webFramework === 'vue') { -%>
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
+import type { Ref } from 'vue';
+<% } else { -%>
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+<% } -%>
+
+const API_URL = <% if (webFramework === 'nextjs') { -%>process.env.NEXT_PUBLIC_API_URL<% } else { -%>import.meta.env.VITE_API_URL<% } -%> || 'http://localhost:3001';
+
+/**
+ * Generic API fetch helper with error handling
+ */
+async function fetchApi<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const res = await fetch(`${API_URL}${endpoint}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+    ...options,
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: 'Request failed' }));
+    throw new Error(error.message || `HTTP ${res.status}`);
+  }
+
+  return res.json();
+}
+
+/**
+ * Example: Fetch a list of items
+ */
+export function useItems() {
+  return useQuery({
+    queryKey: ['items'],
+    queryFn: () => fetchApi<{ data: unknown[]; total: number }>('/api/items'),
+  });
+}
+
+/**
+ * Example: Fetch a single item by ID
+ */
+<% if (webFramework === 'vue') { -%>
+export function useItem(id: Ref<string>) {
+  return useQuery({
+    queryKey: ['items', id],
+    queryFn: () => fetchApi<{ data: unknown }>(`/api/items/${id.value}`),
+    enabled: () => !!id.value,
+  });
+}
+<% } else { -%>
+export function useItem(id: string | undefined) {
+  return useQuery({
+    queryKey: ['items', id],
+    queryFn: () => fetchApi<{ data: unknown }>(`/api/items/${id}`),
+    enabled: !!id,
+  });
+}
+<% } -%>
+
+/**
+ * Example: Create a new item
+ */
+export function useCreateItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { name: string; description?: string }) =>
+      fetchApi<{ data: unknown }>('/api/items', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      // Invalidate items list to refetch
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+}
+
+/**
+ * Example: Delete an item
+ */
+export function useDeleteItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      fetchApi<{ success: boolean }>(`/api/items/${id}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+}

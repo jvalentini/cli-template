@@ -1,0 +1,8 @@
+{
+  "name": "tanstack-router",
+  "displayName": "TanStack Router",
+  "description": "Type-safe routing for React applications",
+  "version": "1.0.0",
+  "type": "addon",
+  "files": ["src/router.tsx.ejs", "src/routes/index.tsx.ejs", "src/routes/about.tsx.ejs"]
+}

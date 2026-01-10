@@ -2,9 +2,11 @@
 
 import { createRequire } from 'node:module'
 import { z } from 'zod'
+import { handleCacheCommand } from './commands/cache.js'
 import { handlePluginsCommand } from './commands/plugins.js'
 import { handleSyncCommand } from './commands/sync.js'
 import { formatConfigError, loadConfigFile } from './config/index.js'
+import { fetchRemoteTemplate, formatRemoteRef } from './remote/index.js'
 import { bold, cyan, dim, error, green } from './utils/colors.js'
 import { runFromConfig, runWizard } from './wizard/index.js'
 
@@ -23,6 +25,11 @@ const CliOptionsSchema = z.object({
     .min(1, 'Config path cannot be empty')
     .optional()
     .describe('Path to config file for non-interactive mode'),
+  template: z
+    .string()
+    .min(1, 'Template path cannot be empty')
+    .optional()
+    .describe('Remote template (github:user/repo or GitHub URL)'),
   dryRun: z.boolean().default(false).describe('Show what would be generated without writing files'),
   version: z.boolean().default(false).describe('Show version number'),
   help: z.boolean().default(false).describe('Show help message'),
@@ -46,11 +53,13 @@ ${bold('USAGE:')}
 
 ${bold('COMMANDS:')}
   plugins              Manage Bakery plugins (list, add, remove, create)
+  cache                Manage cached remote templates (list, clear)
   sync                 Update project from latest templates
 
 ${bold('OPTIONS:')}
   -o, --output <dir>   Output directory (default: ./<project-name>)
   -c, --config <file>  Config file for non-interactive mode (JSON)
+  -t, --template <ref> Use remote template (github:user/repo or URL)
   -n, --dry-run        Show what would be generated without writing files
   -v, --version        Show version number
   -h, --help           Show this help message
@@ -70,6 +79,15 @@ ${bold('EXAMPLES:')}
 
   ${dim('# List installed plugins')}
   bakery plugins list
+
+  ${dim('# Use a remote template from GitHub')}
+  bakery --template github:user/repo
+  bakery --template github:user/repo#v1.0.0
+  bakery -t https://github.com/user/repo
+
+  ${dim('# Manage template cache')}
+  bakery cache list
+  bakery cache clear
 
 ${bold('CONFIG FILE FORMAT:')}
   ${dim('{')}
@@ -127,6 +145,18 @@ function parseArgs(args: readonly string[]): ParsedCli {
           throw new CliParseError('--config requires a file path')
         }
         rawOptions['config'] = nextArg
+        i += 2
+        break
+      }
+      case '-t':
+      case '--template': {
+        const nextArg = args[i + 1]
+        if (nextArg === undefined || nextArg.startsWith('-')) {
+          throw new CliParseError(
+            '--template requires a template reference (e.g., github:user/repo)',
+          )
+        }
+        rawOptions['template'] = nextArg
         i += 2
         break
       }
@@ -190,6 +220,11 @@ async function main(): Promise<void> {
       process.exit(0)
     }
 
+    if (firstArg === 'cache') {
+      await handleCacheCommand(args.slice(1))
+      process.exit(0)
+    }
+
     const { options, positional } = parseArgs(args)
 
     if (options.version) {
@@ -204,6 +239,26 @@ async function main(): Promise<void> {
 
     const outputPath = options.output ?? positional[0]
 
+    let templatePath: string | undefined
+    if (options.template) {
+      console.log(dim('Fetching remote template...'))
+      const fetchResult = fetchRemoteTemplate(options.template)
+
+      if (fetchResult.isErr()) {
+        console.error(error(fetchResult.error.message))
+        process.exit(1)
+      }
+
+      const { ref, path: cachedPath, fromCache } = fetchResult.value
+      templatePath = cachedPath
+
+      if (fromCache) {
+        console.log(dim(`Using cached template: ${formatRemoteRef(ref)}`))
+      } else {
+        console.log(green(`Fetched template: ${formatRemoteRef(ref)}`))
+      }
+    }
+
     if (options.config) {
       const configResult = loadConfigFile(options.config)
 
@@ -212,9 +267,12 @@ async function main(): Promise<void> {
         process.exit(1)
       }
 
-      await runFromConfig(configResult.value, outputPath, { dryRun: options.dryRun })
+      await runFromConfig(configResult.value, outputPath, {
+        dryRun: options.dryRun,
+        templatePath,
+      })
     } else {
-      await runWizard(outputPath, { dryRun: options.dryRun })
+      await runWizard(outputPath, { dryRun: options.dryRun, templatePath })
     }
   } catch (err) {
     if (err instanceof CliParseError) {

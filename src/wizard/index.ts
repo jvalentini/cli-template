@@ -6,6 +6,7 @@ import { closePrompts, type ProjectConfig, printSummary, runPrompts } from './pr
 
 export interface WizardOptions {
   dryRun?: boolean
+  templatePath?: string | undefined
 }
 
 function validateOutputDir(outputDir: string): void {

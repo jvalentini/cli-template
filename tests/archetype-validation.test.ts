@@ -31,11 +31,14 @@ function isValidJson(dir: string, ...parts: string[]): boolean {
   }
 }
 
+const CONVEX_ARCHETYPES = ['convex-saas', 'convex-full-stack']
+
 function getExampleConfigs(): string[] {
   const examplesDir = path.join(import.meta.dirname, '..', 'examples')
   return fs
     .readdirSync(examplesDir)
     .filter((f) => f.endsWith('.json'))
+    .filter((f) => !CONVEX_ARCHETYPES.some((c) => f.startsWith(c)))
     .map((f) => path.join(examplesDir, f))
 }
 

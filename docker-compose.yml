@@ -15,7 +15,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    command: bun test
+    command: bun test tests/
 
   test-watch:
     build:

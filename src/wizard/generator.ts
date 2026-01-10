@@ -34,7 +34,11 @@ export interface DryRunResult {
   devDependencies: string[]
 }
 
-export function generateProjectDryRun(config: ProjectConfig, outputDir: string): DryRunResult {
+export function generateProjectDryRun(
+  config: ProjectConfig,
+  outputDir: string,
+  templatePath?: string,
+): DryRunResult {
   const context = createTemplateContext({
     projectName: config.projectName,
     description: config.description,
@@ -47,10 +51,6 @@ export function generateProjectDryRun(config: ProjectConfig, outputDir: string):
     addons: config.addons,
   })
 
-  const templatesDir = getTemplatesDir()
-  const archetypePath = path.join(templatesDir, config.archetype)
-  const manifest = loadTemplateManifest(archetypePath)
-
   const result: DryRunResult = {
     files: [],
     totalSize: 0,
@@ -58,6 +58,23 @@ export function generateProjectDryRun(config: ProjectConfig, outputDir: string):
     dependencies: [],
     devDependencies: [],
   }
+
+  // Use remote template if provided
+  if (templatePath) {
+    const files = processTemplateDirectory(templatePath, context)
+    for (const [filePath, content] of files) {
+      if (filePath !== 'template.json') {
+        result.files.push({ path: filePath, size: Buffer.byteLength(content, 'utf-8') })
+        result.totalSize += Buffer.byteLength(content, 'utf-8')
+      }
+    }
+    return result
+  }
+
+  // Use built-in templates
+  const templatesDir = getTemplatesDir()
+  const archetypePath = path.join(templatesDir, config.archetype)
+  const manifest = loadTemplateManifest(archetypePath)
 
   if (manifest?.baseCommand) {
     const projectName = path.basename(outputDir)
@@ -111,7 +128,11 @@ export function generateProjectDryRun(config: ProjectConfig, outputDir: string):
   return result
 }
 
-export function generateProject(config: ProjectConfig, outputDir: string): void {
+export function generateProject(
+  config: ProjectConfig,
+  outputDir: string,
+  templatePath?: string,
+): void {
   const context = createTemplateContext({
     projectName: config.projectName,
     description: config.description,
@@ -123,6 +144,11 @@ export function generateProject(config: ProjectConfig, outputDir: string): void 
     webFramework: config.webFramework,
     addons: config.addons,
   })
+
+  if (templatePath) {
+    generateFromRemoteTemplate(config, outputDir, templatePath, context)
+    return
+  }
 
   const templatesDir = getTemplatesDir()
   const archetypePath = path.join(templatesDir, config.archetype)
@@ -294,6 +320,65 @@ function generateFromTemplates(
   writeTemplates(allFiles, outputDir)
   writeSetupConfig(config, outputDir)
   initGitRepo(outputDir)
+}
+
+function generateFromRemoteTemplate(
+  config: ProjectConfig,
+  outputDir: string,
+  templatePath: string,
+  context: TemplateContext,
+): void {
+  const allFiles = new Map<string, string>()
+
+  const files = processTemplateDirectory(templatePath, context)
+  for (const [filePath, content] of files) {
+    if (filePath !== 'template.json') {
+      allFiles.set(filePath, content)
+    }
+  }
+
+  writeTemplates(allFiles, outputDir)
+  writeRemoteSetupConfig(config, outputDir, templatePath)
+  initGitRepo(outputDir)
+}
+
+function writeRemoteSetupConfig(
+  config: ProjectConfig,
+  outputDir: string,
+  templatePath: string,
+): void {
+  const manifest = loadTemplateManifest(templatePath)
+  const tasks = manifest?.tasks ?? []
+
+  const setupConfig = {
+    archetype: manifest?.name ?? 'remote',
+    generatedAt: new Date().toISOString(),
+    tasks,
+    source: 'remote',
+    templatePath,
+  }
+
+  const bakeryDir = path.join(outputDir, '.bakery')
+  if (!fs.existsSync(bakeryDir)) {
+    fs.mkdirSync(bakeryDir, { recursive: true })
+  }
+
+  fs.writeFileSync(path.join(bakeryDir, 'setup.json'), `${JSON.stringify(setupConfig, null, 2)}\n`)
+
+  const manifestResult = createManifest(outputDir, {
+    bakeryVersion: pkg.version,
+    archetype: manifest?.name ?? 'remote',
+    addons: config.addons,
+  })
+
+  if (manifestResult.isOk()) {
+    const saveResult = saveManifest(outputDir, manifestResult.value)
+    if (saveResult.isErr()) {
+      console.error(`Warning: Failed to write manifest: ${saveResult.error.message}`)
+    }
+  } else {
+    console.error(`Warning: Failed to create manifest: ${manifestResult.error.message}`)
+  }
 }
 
 function initGitRepo(outputDir: string): void {

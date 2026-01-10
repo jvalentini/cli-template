@@ -83,12 +83,12 @@ export async function runWizard(outputPath?: string, options: WizardOptions = {}
 
     if (options.dryRun) {
       console.error(`\n${dim('Running dry-run...')}`)
-      const result = generateProjectDryRun(config, outputDir)
+      const result = generateProjectDryRun(config, outputDir, options.templatePath)
       printDryRunResult(result)
     } else {
       validateOutputDir(outputDir)
       console.error(`\n${dim('Generating project...')}`)
-      generateProject(config, outputDir)
+      generateProject(config, outputDir, options.templatePath)
       printNextSteps(config.projectName)
     }
   } catch (err) {
@@ -115,12 +115,12 @@ export async function runFromConfig(
 
   if (options.dryRun) {
     console.error(`\n${dim('Running dry-run...')}`)
-    const result = generateProjectDryRun(config, outputDir)
+    const result = generateProjectDryRun(config, outputDir, options.templatePath)
     printDryRunResult(result)
   } else {
     validateOutputDir(outputDir)
     console.error(`\n${dim('Generating project...')}`)
-    generateProject(config, outputDir)
+    generateProject(config, outputDir, options.templatePath)
     printNextSteps(config.projectName)
   }
 }

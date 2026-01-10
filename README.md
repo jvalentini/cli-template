@@ -1,5 +1,7 @@
 # Bakery
 
+![Bakery Banner](banner.png)
+
 Bake fresh projects from recipes - a modular project scaffolder with best-in-class tooling pre-configured.
 
 ## Why?

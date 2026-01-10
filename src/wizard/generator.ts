@@ -79,8 +79,8 @@ function generateFromBaseCommand(
     runPostProcess(outputDir, manifest.postProcess)
   }
 
-  applyOverlays(config, outputDir, context)
   applyTemplateFiles(config, outputDir, context)
+  applyOverlays(config, outputDir, context)
   initGitRepo(outputDir)
 }
 

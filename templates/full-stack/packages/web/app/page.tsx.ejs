@@ -1,35 +1,35 @@
 <% if (webFramework === 'nextjs') { -%>
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 interface ApiInfo {
-  name: string;
-  version: string;
+  name: string
+  version: string
 }
 
 export default function HomePage() {
-  const [apiInfo, setApiInfo] = useState<ApiInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [apiInfo, setApiInfo] = useState<ApiInfo | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`${API_URL}/`)
       .then((res) => {
-        if (!res.ok) throw new Error('API request failed');
-        return res.json();
+        if (!res.ok) throw new Error('API request failed')
+        return res.json()
       })
       .then((data) => {
-        setApiInfo(data);
-        setLoading(false);
+        setApiInfo(data)
+        setLoading(false)
       })
       .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
+        setError(err.message)
+        setLoading(false)
+      })
+  }, [])
 
   return (
     <main style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
@@ -55,12 +55,18 @@ export default function HomePage() {
       <div style={{ marginTop: '2rem' }}>
         <h2>Getting Started</h2>
         <ul>
-          <li>Edit <code>app/page.tsx</code> to modify this page</li>
-          <li>API endpoint: <code>{API_URL}</code></li>
-          <li>Run <code>bun run dev</code> to start development</li>
+          <li>
+            Edit <code>app/page.tsx</code> to modify this page
+          </li>
+          <li>
+            API endpoint: <code>{API_URL}</code>
+          </li>
+          <li>
+            Run <code>bun run dev</code> to start development
+          </li>
         </ul>
       </div>
     </main>
-  );
+  )
 }
 <% } -%>

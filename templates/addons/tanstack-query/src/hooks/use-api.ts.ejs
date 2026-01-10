@@ -1,33 +1,30 @@
 <% if (webFramework === 'vue') { -%>
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { Ref } from 'vue';
+import type { Ref } from 'vue'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 <% } else { -%>
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 <% } -%>
 
-const API_URL = <% if (webFramework === 'nextjs') { -%>process.env.NEXT_PUBLIC_API_URL<% } else { -%>import.meta.env.VITE_API_URL<% } -%> || 'http://localhost:3001';
+const API_URL = <% if (webFramework === 'nextjs') { -%>process.env.NEXT_PUBLIC_API_URL<% } else { -%>import.meta.env.VITE_API_URL<% } -%> || 'http://localhost:3001'
 
 /**
  * Generic API fetch helper with error handling
  */
-async function fetchApi<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
+async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${endpoint}`, {
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
     },
     ...options,
-  });
+  })
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(error.message || `HTTP ${res.status}`);
+    const error = await res.json().catch(() => ({ message: 'Request failed' }))
+    throw new Error(error.message || `HTTP ${res.status}`)
   }
 
-  return res.json();
+  return res.json()
 }
 
 /**
@@ -37,7 +34,7 @@ export function useItems() {
   return useQuery({
     queryKey: ['items'],
     queryFn: () => fetchApi<{ data: unknown[]; total: number }>('/api/items'),
-  });
+  })
 }
 
 /**
@@ -49,7 +46,7 @@ export function useItem(id: Ref<string>) {
     queryKey: ['items', id],
     queryFn: () => fetchApi<{ data: unknown }>(`/api/items/${id.value}`),
     enabled: () => !!id.value,
-  });
+  })
 }
 <% } else { -%>
 export function useItem(id: string | undefined) {
@@ -57,7 +54,7 @@ export function useItem(id: string | undefined) {
     queryKey: ['items', id],
     queryFn: () => fetchApi<{ data: unknown }>(`/api/items/${id}`),
     enabled: !!id,
-  });
+  })
 }
 <% } -%>
 
@@ -65,7 +62,7 @@ export function useItem(id: string | undefined) {
  * Example: Create a new item
  */
 export function useCreateItem() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (data: { name: string; description?: string }) =>
@@ -75,16 +72,16 @@ export function useCreateItem() {
       }),
     onSuccess: () => {
       // Invalidate items list to refetch
-      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['items'] })
     },
-  });
+  })
 }
 
 /**
  * Example: Delete an item
  */
 export function useDeleteItem() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (id: string) =>
@@ -92,7 +89,7 @@ export function useDeleteItem() {
         method: 'DELETE',
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['items'] })
     },
-  });
+  })
 }

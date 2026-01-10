@@ -1,164 +1,165 @@
-import { describe, expect, it, beforeEach } from 'bun:test';
+process.env.NODE_ENV = 'test'
+
+import { describe, expect, it } from 'bun:test'
 <% if (apiFramework === 'hono') { -%>
-import app from '../src/server.js';
+import app from '../src/server.js'
 
 const request = (path: string, options?: RequestInit) => {
-  return app.fetch(new Request(`http://localhost${path}`, options));
-};
+  return app.fetch(new Request(`http://localhost${path}`, options))
+}
 <% } else if (apiFramework === 'express') { -%>
-import app from '../src/server.js';
-
-// Simple test helper for Express
-const baseUrl = 'http://localhost:3000';
+import app from '../src/server.js'
 <% } else if (apiFramework === 'elysia') { -%>
-import app from '../src/server.js';
+import app from '../src/server.js'
 <% } -%>
 
 describe('API', () => {
   describe('Health endpoints', () => {
 <% if (apiFramework === 'hono') { -%>
     it('should return health status', async () => {
-      const res = await request('/health');
-      expect(res.status).toBe(200);
+      const res = await request('/health')
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.status).toBe('healthy');
-      expect(json.timestamp).toBeDefined();
-    });
+      const json = await res.json()
+      expect(json.status).toBe('healthy')
+      expect(json.timestamp).toBeDefined()
+    })
 
     it('should return readiness status', async () => {
-      const res = await request('/health/ready');
-      expect(res.status).toBe(200);
+      const res = await request('/health/ready')
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.status).toBe('ready');
-    });
+      const json = await res.json()
+      expect(json.status).toBe('ready')
+    })
 
     it('should return liveness status', async () => {
-      const res = await request('/health/live');
-      expect(res.status).toBe(200);
+      const res = await request('/health/live')
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.status).toBe('alive');
-    });
+      const json = await res.json()
+      expect(json.status).toBe('alive')
+    })
 <% } else if (apiFramework === 'elysia') { -%>
     it('should return health status', async () => {
-      const res = await app.handle(new Request('http://localhost/health'));
-      expect(res.status).toBe(200);
+      const res = await app.handle(new Request('http://localhost/health'))
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.status).toBe('healthy');
-      expect(json.timestamp).toBeDefined();
-    });
+      const json = await res.json()
+      expect(json.status).toBe('healthy')
+      expect(json.timestamp).toBeDefined()
+    })
 
     it('should return readiness status', async () => {
-      const res = await app.handle(new Request('http://localhost/health/ready'));
-      expect(res.status).toBe(200);
+      const res = await app.handle(new Request('http://localhost/health/ready'))
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.status).toBe('ready');
-    });
+      const json = await res.json()
+      expect(json.status).toBe('ready')
+    })
 
     it('should return liveness status', async () => {
-      const res = await app.handle(new Request('http://localhost/health/live'));
-      expect(res.status).toBe(200);
+      const res = await app.handle(new Request('http://localhost/health/live'))
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.status).toBe('alive');
-    });
+      const json = await res.json()
+      expect(json.status).toBe('alive')
+    })
 <% } else { -%>
     // Express tests require running server or supertest
     it('should have health routes configured', () => {
-      expect(app).toBeDefined();
-    });
+      expect(app).toBeDefined()
+    })
 <% } -%>
-  });
+  })
 
   describe('Root endpoint', () => {
 <% if (apiFramework === 'hono') { -%>
     it('should return API info', async () => {
-      const res = await request('/');
-      expect(res.status).toBe(200);
+      const res = await request('/')
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.name).toBe('<%= projectName %>');
-      expect(json.version).toBe('0.1.0');
-    });
+      const json = await res.json()
+      expect(json.name).toBe('<%= projectName %>')
+      expect(json.version).toBe('0.1.0')
+    })
 <% } else if (apiFramework === 'elysia') { -%>
     it('should return API info', async () => {
-      const res = await app.handle(new Request('http://localhost/'));
-      expect(res.status).toBe(200);
+      const res = await app.handle(new Request('http://localhost/'))
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.name).toBe('<%= projectName %>');
-      expect(json.version).toBe('0.1.0');
-    });
+      const json = await res.json()
+      expect(json.name).toBe('<%= projectName %>')
+      expect(json.version).toBe('0.1.0')
+    })
 <% } else { -%>
     it('should have root route configured', () => {
-      expect(app).toBeDefined();
-    });
+      expect(app).toBeDefined()
+    })
 <% } -%>
-  });
+  })
 
   describe('Items API', () => {
 <% if (apiFramework === 'hono') { -%>
     it('should list items', async () => {
-      const res = await request('/api/items');
-      expect(res.status).toBe(200);
+      const res = await request('/api/items')
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.data).toBeArray();
-      expect(json.total).toBeNumber();
-    });
+      const json = await res.json()
+      expect(json.data).toBeArray()
+      expect(json.total).toBeNumber()
+    })
 
     it('should create an item', async () => {
       const res = await request('/api/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'Test Item', description: 'A test' }),
-      });
-      expect(res.status).toBe(201);
+      })
+      expect(res.status).toBe(201)
 
-      const json = await res.json();
-      expect(json.data.name).toBe('Test Item');
-      expect(json.data.id).toBeDefined();
-    });
+      const json = await res.json()
+      expect(json.data.name).toBe('Test Item')
+      expect(json.data.id).toBeDefined()
+    })
 
     it('should return 404 for non-existent item', async () => {
-      const res = await request('/api/items/non-existent-id');
-      expect(res.status).toBe(404);
-    });
+      const res = await request('/api/items/non-existent-id')
+      expect(res.status).toBe(404)
+    })
 <% } else if (apiFramework === 'elysia') { -%>
     it('should list items', async () => {
-      const res = await app.handle(new Request('http://localhost/api/items'));
-      expect(res.status).toBe(200);
+      const res = await app.handle(new Request('http://localhost/api/items'))
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.data).toBeArray();
-      expect(json.total).toBeNumber();
-    });
+      const json = await res.json()
+      expect(json.data).toBeArray()
+      expect(json.total).toBeNumber()
+    })
 
     it('should create an item', async () => {
-      const res = await app.handle(new Request('http://localhost/api/items', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Test Item', description: 'A test' }),
-      }));
-      expect(res.status).toBe(200);
+      const res = await app.handle(
+        new Request('http://localhost/api/items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'Test Item', description: 'A test' }),
+        }),
+      )
+      expect(res.status).toBe(200)
 
-      const json = await res.json();
-      expect(json.data.name).toBe('Test Item');
-      expect(json.data.id).toBeDefined();
-    });
+      const json = await res.json()
+      expect(json.data.name).toBe('Test Item')
+      expect(json.data.id).toBeDefined()
+    })
 
     it('should return 404 for non-existent item', async () => {
-      const res = await app.handle(new Request('http://localhost/api/items/non-existent-id'));
-      expect(res.status).toBe(404);
-    });
+      const res = await app.handle(new Request('http://localhost/api/items/non-existent-id'))
+      expect(res.status).toBe(404)
+    })
 <% } else { -%>
     it('should have items routes configured', () => {
-      expect(app).toBeDefined();
-    });
+      expect(app).toBeDefined()
+    })
 <% } -%>
-  });
-});
+  })
+})

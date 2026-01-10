@@ -1,14 +1,14 @@
 #!/usr/bin/env bun
 
-import { error, green } from './utils/colors.js';
-import { ArgumentError } from './utils/errors.js';
+import { error, green } from './utils/colors.js'
+import { ArgumentError } from './utils/errors.js'
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.0'
 
 interface CliOptions {
-  verbose?: boolean;
-  quiet?: boolean;
-  debug?: boolean;
+  verbose?: boolean
+  quiet?: boolean
+  debug?: boolean
 }
 
 function printHelp(): void {
@@ -34,104 +34,104 @@ EXAMPLES:
   <%= projectName %> hello
   <%= projectName %> hello --verbose
   <%= projectName %> --help
-`);
+`)
 }
 
 function parseArgs(args: string[]): { command?: string; options: CliOptions } {
-  const options: CliOptions = {};
-  let command: string | undefined;
-  let i = 0;
+  const options: CliOptions = {}
+  let command: string | undefined
+  let i = 0
 
   while (i < args.length) {
-    const arg = args[i];
+    const arg = args[i]
 
     switch (arg) {
       case '-v':
       case '--verbose':
-        options.verbose = true;
-        break;
+        options.verbose = true
+        break
       case '-q':
       case '--quiet':
-        options.quiet = true;
-        break;
+        options.quiet = true
+        break
       case '--debug':
-        options.debug = true;
-        break;
+        options.debug = true
+        break
       case '-h':
       case '--help':
-        printHelp();
-        process.exit(0);
-        break;
+        printHelp()
+        process.exit(0)
+        break
       case '--version':
-        console.log(VERSION);
-        process.exit(0);
-        break;
+        console.log(VERSION)
+        process.exit(0)
+        break
       default:
         if (arg.startsWith('-')) {
-          throw new ArgumentError(`Unknown option: ${arg}`);
+          throw new ArgumentError(`Unknown option: ${arg}`)
         }
         if (!command) {
-          command = arg;
+          command = arg
         }
     }
-    i++;
+    i++
   }
 
-  return { command, options };
+  return { command, options }
 }
 
 function runHello(options: CliOptions): void {
   if (options.verbose) {
-    console.log('Running hello command...');
+    console.log('Running hello command...')
   }
 
-  console.log(green('Hello from <%= projectName %>!'));
+  console.log(green('Hello from <%= projectName %>!'))
 
   if (options.verbose) {
-    console.log('Command completed successfully.');
+    console.log('Command completed successfully.')
   }
 }
 
 async function main(): Promise<void> {
   try {
-    const args = process.argv.slice(2);
+    const args = process.argv.slice(2)
 
     if (args.length === 0) {
-      printHelp();
-      process.exit(0);
+      printHelp()
+      process.exit(0)
     }
 
-    const { command, options } = parseArgs(args);
+    const { command, options } = parseArgs(args)
 
     if (options.debug) {
-      console.log('Debug mode enabled');
-      console.log('Command:', command);
-      console.log('Options:', JSON.stringify(options));
+      console.log('Debug mode enabled')
+      console.log('Command:', command)
+      console.log('Options:', JSON.stringify(options))
     }
 
     switch (command) {
       case 'hello':
-        runHello(options);
-        break;
+        runHello(options)
+        break
       case 'version':
-        console.log(VERSION);
-        break;
+        console.log(VERSION)
+        break
       default:
         if (command) {
-          throw new ArgumentError(`Unknown command: ${command}`);
+          throw new ArgumentError(`Unknown command: ${command}`)
         }
-        printHelp();
+        printHelp()
     }
   } catch (err) {
     if (err instanceof ArgumentError) {
-      console.error(error(err.message));
-      console.error('Run "<%= projectName %> --help" for usage information');
-      process.exit(1);
+      console.error(error(err.message))
+      console.error('Run "<%= projectName %> --help" for usage information')
+      process.exit(1)
     }
 
-    console.error(error(err instanceof Error ? err.message : String(err)));
-    process.exit(1);
+    console.error(error(err instanceof Error ? err.message : String(err)))
+    process.exit(1)
   }
 }
 
-main();
+main()

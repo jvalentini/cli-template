@@ -1,53 +1,56 @@
 <% if (apiFramework === 'hono') { -%>
-import { Hono } from 'hono';
 <% if (hasAddon('zod')) { -%>
-import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
+import { zValidator } from '@hono/zod-validator'
+<% } -%>
+import { Hono } from 'hono'
+<% if (hasAddon('zod')) { -%>
+import { z } from 'zod'
 
 const ItemSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-});
+})
 
-type Item = z.infer<typeof ItemSchema> & { id: string; createdAt: string };
+type Item = z.infer<typeof ItemSchema> & { id: string; createdAt: string }
 <% } else { -%>
+
 interface Item {
-  id: string;
-  name: string;
-  description?: string;
-  createdAt: string;
+  id: string
+  name: string
+  description?: string
+  createdAt: string
 }
 <% } -%>
 
-export const apiRoutes = new Hono();
+export const apiRoutes = new Hono()
 
 // In-memory store (replace with your database)
-const items: Item[] = [];
+const items: Item[] = []
 
 // List all items
 apiRoutes.get('/items', (c) => {
-  return c.json({ data: items, total: items.length });
-});
+  return c.json({ data: items, total: items.length })
+})
 
 // Get single item
 apiRoutes.get('/items/:id', (c) => {
-  const id = c.req.param('id');
-  const item = items.find((i) => i.id === id);
+  const id = c.req.param('id')
+  const item = items.find((i) => i.id === id)
 
   if (!item) {
-    return c.json({ error: 'Item not found' }, 404);
+    return c.json({ error: 'Item not found' }, 404)
   }
 
-  return c.json({ data: item });
-});
+  return c.json({ data: item })
+})
 
 // Create item
 <% if (hasAddon('zod')) { -%>
 apiRoutes.post('/items', zValidator('json', ItemSchema), (c) => {
-  const body = c.req.valid('json');
+  const body = c.req.valid('json')
 <% } else { -%>
 apiRoutes.post('/items', async (c) => {
-  const body = await c.req.json<{ name: string; description?: string }>();
+  const body = await c.req.json<{ name: string; description?: string }>()
 <% } -%>
 
   const item: Item = {
@@ -55,79 +58,80 @@ apiRoutes.post('/items', async (c) => {
     name: body.name,
     description: body.description,
     createdAt: new Date().toISOString(),
-  };
+  }
 
-  items.push(item);
-  return c.json({ data: item }, 201);
-});
+  items.push(item)
+  return c.json({ data: item }, 201)
+})
 
 // Delete item
 apiRoutes.delete('/items/:id', (c) => {
-  const id = c.req.param('id');
-  const index = items.findIndex((i) => i.id === id);
+  const id = c.req.param('id')
+  const index = items.findIndex((i) => i.id === id)
 
   if (index === -1) {
-    return c.json({ error: 'Item not found' }, 404);
+    return c.json({ error: 'Item not found' }, 404)
   }
 
-  items.splice(index, 1);
-  return c.json({ success: true });
-});
+  items.splice(index, 1)
+  return c.json({ success: true })
+})
 <% } else if (apiFramework === 'express') { -%>
-import { Router } from 'express';
+import { Router } from 'express'
 <% if (hasAddon('zod')) { -%>
-import { z } from 'zod';
+import { z } from 'zod'
 
 const ItemSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-});
+})
 
-type Item = z.infer<typeof ItemSchema> & { id: string; createdAt: string };
+type Item = z.infer<typeof ItemSchema> & { id: string; createdAt: string }
 <% } else { -%>
+
 interface Item {
-  id: string;
-  name: string;
-  description?: string;
-  createdAt: string;
+  id: string
+  name: string
+  description?: string
+  createdAt: string
 }
 <% } -%>
 
-export const apiRoutes = Router();
+export const apiRoutes = Router()
 
 // In-memory store (replace with your database)
-const items: Item[] = [];
+const items: Item[] = []
 
 // List all items
-apiRoutes.get('/items', (req, res) => {
-  res.json({ data: items, total: items.length });
-});
+apiRoutes.get('/items', (_req, res) => {
+  res.json({ data: items, total: items.length })
+})
 
 // Get single item
 apiRoutes.get('/items/:id', (req, res) => {
-  const item = items.find((i) => i.id === req.params.id);
+  const item = items.find((i) => i.id === req.params.id)
 
   if (!item) {
-    res.status(404).json({ error: 'Item not found' });
-    return;
+    res.status(404).json({ error: 'Item not found' })
+    return
   }
 
-  res.json({ data: item });
-});
+  res.json({ data: item })
+})
 
 // Create item
 apiRoutes.post('/items', (req, res) => {
 <% if (hasAddon('zod')) { -%>
-  const result = ItemSchema.safeParse(req.body);
+  const result = ItemSchema.safeParse(req.body)
 
   if (!result.success) {
-    res.status(400).json({ error: 'Validation failed', details: result.error.issues });
-    return;
+    res.status(400).json({ error: 'Validation failed', details: result.error.issues })
+    return
   }
 
-  const body = result.data;
+  const body = result.data
 <% } else { -%>
-  const body = req.body as { name: string; description?: string };
+  const body = req.body as { name: string; description?: string }
 <% } -%>
 
   const item: Item = {
@@ -135,46 +139,47 @@ apiRoutes.post('/items', (req, res) => {
     name: body.name,
     description: body.description,
     createdAt: new Date().toISOString(),
-  };
+  }
 
-  items.push(item);
-  res.status(201).json({ data: item });
-});
+  items.push(item)
+  res.status(201).json({ data: item })
+})
 
 // Delete item
 apiRoutes.delete('/items/:id', (req, res) => {
-  const index = items.findIndex((i) => i.id === req.params.id);
+  const index = items.findIndex((i) => i.id === req.params.id)
 
   if (index === -1) {
-    res.status(404).json({ error: 'Item not found' });
-    return;
+    res.status(404).json({ error: 'Item not found' })
+    return
   }
 
-  items.splice(index, 1);
-  res.json({ success: true });
-});
+  items.splice(index, 1)
+  res.json({ success: true })
+})
 <% } else if (apiFramework === 'elysia') { -%>
-import { Elysia, t } from 'elysia';
+import { Elysia, t } from 'elysia'
 <% if (hasAddon('zod')) { -%>
-import { z } from 'zod';
+import { z } from 'zod'
 
 const ItemSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-});
+})
 
-export type Item = z.infer<typeof ItemSchema> & { id: string; createdAt: string };
+export type Item = z.infer<typeof ItemSchema> & { id: string; createdAt: string }
 <% } else { -%>
+
 export interface Item {
-  id: string;
-  name: string;
-  description?: string;
-  createdAt: string;
+  id: string
+  name: string
+  description?: string
+  createdAt: string
 }
 <% } -%>
 
 // In-memory store (replace with your database)
-const items: Item[] = [];
+const items: Item[] = []
 
 export const apiRoutes = new Elysia({ prefix: '/api' })
   // List all items
@@ -184,52 +189,77 @@ export const apiRoutes = new Elysia({ prefix: '/api' })
   }))
   // Get single item
   .get('/items/:id', ({ params, status }) => {
-    const item = items.find((i) => i.id === params.id);
+    const item = items.find((i) => i.id === params.id)
 
     if (!item) {
-      return status(404, { error: 'Item not found' });
+      return status(404, { error: 'Item not found' })
     }
 
-    return { data: item };
+    return { data: item }
   })
   // Create item
-  .post('/items', ({ body, status }) => {
 <% if (hasAddon('zod')) { -%>
-    const result = ItemSchema.safeParse(body);
+  .post(
+    '/items',
+    ({ body, status }) => {
+      const result = ItemSchema.safeParse(body)
 
-    if (!result.success) {
-      return status(400, { error: 'Validation failed', details: result.error.issues });
-    }
+      if (!result.success) {
+        return status(400, { error: 'Validation failed', details: result.error.issues })
+      }
 
-    const validBody = result.data;
+      const validBody = result.data
+
+      const item: Item = {
+        id: crypto.randomUUID(),
+        name: validBody.name,
+        description: validBody.description,
+        createdAt: new Date().toISOString(),
+      }
+
+      items.push(item)
+      return { data: item }
+    },
+    {
+      body: t.Object({
+        name: t.String(),
+        description: t.Optional(t.String()),
+      }),
+    },
+  )
 <% } else { -%>
-    const validBody = body as { name: string; description?: string };
+  .post(
+    '/items',
+    ({ body }) => {
+      const validBody = body as { name: string; description?: string }
+
+      const item: Item = {
+        id: crypto.randomUUID(),
+        name: validBody.name,
+        description: validBody.description,
+        createdAt: new Date().toISOString(),
+      }
+
+      items.push(item)
+      return { data: item }
+    },
+    {
+      body: t.Object({
+        name: t.String(),
+        description: t.Optional(t.String()),
+      }),
+    },
+  )
 <% } -%>
-
-    const item: Item = {
-      id: crypto.randomUUID(),
-      name: validBody.name,
-      description: validBody.description,
-      createdAt: new Date().toISOString(),
-    };
-
-    items.push(item);
-    return { data: item };
-  }, {
-    body: t.Object({
-      name: t.String(),
-      description: t.Optional(t.String()),
-    }),
-  })
   // Delete item
   .delete('/items/:id', ({ params, status }) => {
-    const index = items.findIndex((i) => i.id === params.id);
+    const index = items.findIndex((i) => i.id === params.id)
 
     if (index === -1) {
-      return status(404, { error: 'Item not found' });
+      return status(404, { error: 'Item not found' })
     }
 
-    items.splice(index, 1);
-    return { success: true };
-  });
+    items.splice(index, 1)
+    return { success: true }
+  })
 <% } -%>

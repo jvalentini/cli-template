@@ -1,25 +1,21 @@
 <% if (apiFramework === 'hono') { -%>
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-import { prettyJSON } from 'hono/pretty-json';
-<% if (hasAddon('zod')) { -%>
-import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
-<% } -%>
-import { healthRoutes } from './routes/health.js';
-import { apiRoutes } from './routes/api.js';
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { logger } from 'hono/logger'
+import { prettyJSON } from 'hono/pretty-json'
+import { apiRoutes } from './routes/api.js'
+import { healthRoutes } from './routes/health.js'
 
-const app = new Hono();
+const app = new Hono()
 
 // Middleware
-app.use('*', logger());
-app.use('*', cors());
-app.use('*', prettyJSON());
+app.use('*', logger())
+app.use('*', cors())
+app.use('*', prettyJSON())
 
 // Routes
-app.route('/health', healthRoutes);
-app.route('/api', apiRoutes);
+app.route('/health', healthRoutes)
+app.route('/api', apiRoutes)
 
 // Root endpoint
 app.get('/', (c) => {
@@ -27,92 +23,86 @@ app.get('/', (c) => {
     name: '<%= projectName %>',
     version: '0.1.0',
     docs: '/api',
-  });
-});
+  })
+})
 
 // 404 handler
 app.notFound((c) => {
-  return c.json({ error: 'Not Found', status: 404 }, 404);
-});
+  return c.json({ error: 'Not Found', status: 404 }, 404)
+})
 
 // Error handler
 app.onError((err, c) => {
-  console.error('Server error:', err);
-  return c.json({ error: 'Internal Server Error', status: 500 }, 500);
-});
+  console.error('Server error:', err)
+  return c.json({ error: 'Internal Server Error', status: 500 }, 500)
+})
 
-const port = parseInt(process.env.PORT || '3000', 10);
+const port = parseInt(process.env.PORT || '3000', 10)
 
-console.log(`🚀 Server running at http://localhost:${port}`);
+console.log(`🚀 Server running at http://localhost:${port}`)
 
 export default {
   port,
   fetch: app.fetch,
-};
+}
 <% } else if (apiFramework === 'express') { -%>
-import express from 'express';
-<% if (hasAddon('zod')) { -%>
-import { z } from 'zod';
-<% } -%>
-import { healthRoutes } from './routes/health.js';
-import { apiRoutes } from './routes/api.js';
+import express from 'express'
+import { apiRoutes } from './routes/api.js'
+import { healthRoutes } from './routes/health.js'
 
-const app = express();
+const app = express()
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 // CORS
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-    return;
+    res.sendStatus(200)
+    return
   }
-  next();
-});
+  next()
+})
 
 // Routes
-app.use('/health', healthRoutes);
-app.use('/api', apiRoutes);
+app.use('/health', healthRoutes)
+app.use('/api', apiRoutes)
 
 // Root endpoint
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.json({
     name: '<%= projectName %>',
     version: '0.1.0',
     docs: '/api',
-  });
-});
+  })
+})
 
 // 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not Found', status: 404 });
-});
+app.use((_req, res) => {
+  res.status(404).json({ error: 'Not Found', status: 404 })
+})
 
 // Error handler
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Server error:', err);
-  res.status(500).json({ error: 'Internal Server Error', status: 500 });
-});
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Server error:', err)
+  res.status(500).json({ error: 'Internal Server Error', status: 500 })
+})
 
-const port = parseInt(process.env.PORT || '3000', 10);
+const port = parseInt(process.env.PORT || '3000', 10)
 
 app.listen(port, () => {
-  console.log(`🚀 Server running at http://localhost:${port}`);
-});
+  console.log(`🚀 Server running at http://localhost:${port}`)
+})
 
-export default app;
+export default app
 <% } else if (apiFramework === 'elysia') { -%>
-import { Elysia } from 'elysia';
-<% if (hasAddon('zod')) { -%>
-import { z } from 'zod';
-<% } -%>
-import { healthRoutes } from './routes/health.js';
-import { apiRoutes } from './routes/api.js';
+import { Elysia } from 'elysia'
+import { apiRoutes } from './routes/api.js'
+import { healthRoutes } from './routes/health.js'
 
 const app = new Elysia()
   .use(healthRoutes)
@@ -123,18 +113,19 @@ const app = new Elysia()
     docs: '/api',
   }))
   .onError(({ error, code }) => {
-    console.error('Server error:', error);
+    console.error('Server error:', error)
     if (code === 'NOT_FOUND') {
-      return { error: 'Not Found', status: 404 };
+      return { error: 'Not Found', status: 404 }
     }
-    return { error: 'Internal Server Error', status: 500 };
-  });
+    return { error: 'Internal Server Error', status: 500 }
+  })
 
-const port = parseInt(process.env.PORT || '3000', 10);
+const port = parseInt(process.env.PORT || '3000', 10)
 
-app.listen(port);
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port)
+  console.log(`🚀 Server running at http://localhost:${port}`)
+}
 
-console.log(`🚀 Server running at http://localhost:${port}`);
-
-export default app;
+export default app
 <% } -%>

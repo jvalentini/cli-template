@@ -1,17 +1,17 @@
 <% if (webFramework === 'react-vite') { -%>
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
 <% if (hasAddon('tanstack-query')) { -%>
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 <% } -%>
-import { App } from './App.js';
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { App } from './App.js'
 
 <% if (hasAddon('tanstack-query')) { -%>
-const queryClient = new QueryClient();
-<% } -%>
+const queryClient = new QueryClient()
 
-const root = document.getElementById('root');
-if (!root) throw new Error('Root element not found');
+<% } -%>
+const root = document.getElementById('root')
+if (!root) throw new Error('Root element not found')
 
 createRoot(root).render(
   <StrictMode>
@@ -22,33 +22,33 @@ createRoot(root).render(
 <% } else { -%>
     <App />
 <% } -%>
-  </StrictMode>
-);
+  </StrictMode>,
+)
 <% } else if (webFramework === 'tanstack-start') { -%>
 // TanStack Start entry point
 // See https://tanstack.com/start/latest/docs/framework/react/getting-started
-import { createRouter, RouterProvider } from '@tanstack/react-router';
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
 <% if (hasAddon('tanstack-query')) { -%>
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 <% } -%>
-import { routeTree } from './routeTree.gen.js';
+import { createRouter, RouterProvider } from '@tanstack/react-router'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { routeTree } from './routeTree.gen.js'
 
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree })
 
 declare module '@tanstack/react-router' {
   interface Register {
-    router: typeof router;
+    router: typeof router
   }
 }
 
 <% if (hasAddon('tanstack-query')) { -%>
-const queryClient = new QueryClient();
-<% } -%>
+const queryClient = new QueryClient()
 
-const root = document.getElementById('root');
-if (!root) throw new Error('Root element not found');
+<% } -%>
+const root = document.getElementById('root')
+if (!root) throw new Error('Root element not found')
 
 createRoot(root).render(
   <StrictMode>
@@ -59,6 +59,6 @@ createRoot(root).render(
 <% } else { -%>
     <RouterProvider router={router} />
 <% } -%>
-  </StrictMode>
-);
+  </StrictMode>,
+)
 <% } -%>

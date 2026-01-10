@@ -1,5 +1,5 @@
-import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { v } from 'convex/values'
+import { mutation, query } from './_generated/server'
 
 /**
  * List all items, optionally filtered by completion status
@@ -14,15 +14,11 @@ export const list = query({
         .query('items')
         .withIndex('by_completed', (q) => q.eq('completed', args.completed))
         .order('desc')
-        .collect();
+        .collect()
     }
-    return await ctx.db
-      .query('items')
-      .withIndex('by_created')
-      .order('desc')
-      .collect();
+    return await ctx.db.query('items').withIndex('by_created').order('desc').collect()
   },
-});
+})
 
 /**
  * Get a single item by ID
@@ -30,9 +26,9 @@ export const list = query({
 export const get = query({
   args: { id: v.id('items') },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    return await ctx.db.get(args.id)
   },
-});
+})
 
 /**
  * Create a new item
@@ -48,9 +44,9 @@ export const create = mutation({
       description: args.description,
       completed: false,
       createdAt: Date.now(),
-    });
+    })
   },
-});
+})
 
 /**
  * Update an existing item
@@ -63,24 +59,22 @@ export const update = mutation({
     completed: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { id, ...updates } = args;
-    const existing = await ctx.db.get(id);
+    const { id, ...updates } = args
+    const existing = await ctx.db.get(id)
     if (!existing) {
-      throw new Error('Item not found');
+      throw new Error('Item not found')
     }
 
-    const filtered = Object.fromEntries(
-      Object.entries(updates).filter(([_, v]) => v !== undefined)
-    );
+    const filtered = Object.fromEntries(Object.entries(updates).filter(([_, v]) => v !== undefined))
 
     await ctx.db.patch(id, {
       ...filtered,
       updatedAt: Date.now(),
-    });
+    })
 
-    return await ctx.db.get(id);
+    return await ctx.db.get(id)
   },
-});
+})
 
 /**
  * Delete an item
@@ -88,11 +82,11 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id('items') },
   handler: async (ctx, args) => {
-    const existing = await ctx.db.get(args.id);
+    const existing = await ctx.db.get(args.id)
     if (!existing) {
-      throw new Error('Item not found');
+      throw new Error('Item not found')
     }
-    await ctx.db.delete(args.id);
-    return { success: true };
+    await ctx.db.delete(args.id)
+    return { success: true }
   },
-});
+})

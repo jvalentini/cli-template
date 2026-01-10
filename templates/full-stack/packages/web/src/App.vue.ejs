@@ -1,29 +1,27 @@
 <% if (webFramework === 'vue') { -%>
 <script setup lang="ts">
 <% if (hasAddon('tanstack-query')) { -%>
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import { ref } from 'vue';
-<% } -%>
+import { ref } from 'vue'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
-<% if (hasAddon('tanstack-query')) { -%>
 interface Message {
-  id: string;
-  text: string;
-  createdAt: string;
+  id: string
+  text: string
+  createdAt: string
 }
 
-const queryClient = useQueryClient();
-const inputText = ref('');
+const queryClient = useQueryClient()
+const inputText = ref('')
 
 const { data: messages, isLoading } = useQuery({
   queryKey: ['messages'],
   queryFn: async () => {
-    const res = await fetch(`${API_URL}/api/messages`);
-    return res.json() as Promise<Message[]>;
+    const res = await fetch(`${API_URL}/api/messages`)
+    return res.json() as Promise<Message[]>
   },
-});
+})
 
 const { mutate: createMessage, isPending } = useMutation({
   mutationFn: async (text: string) => {
@@ -31,20 +29,23 @@ const { mutate: createMessage, isPending } = useMutation({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
-    });
-    return res.json() as Promise<Message>;
+    })
+    return res.json() as Promise<Message>
   },
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['messages'] });
+    queryClient.invalidateQueries({ queryKey: ['messages'] })
   },
-});
+})
 
 function handleSubmit() {
   if (inputText.value.trim()) {
-    createMessage(inputText.value);
-    inputText.value = '';
+    createMessage(inputText.value)
+    inputText.value = ''
   }
 }
+<% } else { -%>
+// biome-ignore lint/correctness/noUnusedVariables: Used in Vue template
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 <% } -%>
 </script>
 

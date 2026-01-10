@@ -24,4 +24,4 @@ pre-push:
 
     test:
       glob: "*.ts"
-      run: bun test
+      run: bun test tests/

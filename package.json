@@ -28,7 +28,7 @@
     "build:linux-arm64": "mkdir -p dist && bun build src/cli.ts --compile --target=bun-linux-arm64 --outfile dist/bakery-linux-arm64",
     "build:windows-x64": "mkdir -p dist && bun build src/cli.ts --compile --target=bun-windows-x64 --outfile dist/bakery-windows-x64.exe",
     "build:binaries": "bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64",
-    "test": "bun test",
+    "test": "bun test tests/",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
     "validate": "bun run scripts/validate-archetypes.ts",

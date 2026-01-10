@@ -15,6 +15,96 @@ import {
 } from '../templates/loader.js'
 import type { ProjectConfig } from './prompts.js'
 
+export interface DryRunFile {
+  path: string
+  size: number
+}
+
+export interface DryRunResult {
+  files: DryRunFile[]
+  totalSize: number
+  commands: string[]
+  dependencies: string[]
+  devDependencies: string[]
+}
+
+export function generateProjectDryRun(config: ProjectConfig, outputDir: string): DryRunResult {
+  const context = createTemplateContext({
+    projectName: config.projectName,
+    description: config.description,
+    author: config.author,
+    license: config.license,
+    githubUsername: config.githubUsername,
+    archetype: config.archetype,
+    apiFramework: config.apiFramework,
+    webFramework: config.webFramework,
+    addons: config.addons,
+  })
+
+  const templatesDir = getTemplatesDir()
+  const archetypePath = path.join(templatesDir, config.archetype)
+  const manifest = loadTemplateManifest(archetypePath)
+
+  const result: DryRunResult = {
+    files: [],
+    totalSize: 0,
+    commands: [],
+    dependencies: [],
+    devDependencies: [],
+  }
+
+  if (manifest?.baseCommand) {
+    const projectName = path.basename(outputDir)
+    const command = manifest.baseCommand.command
+      .replace(/\{\{projectName\}\}/g, projectName)
+      .replace(/\{\{parentDir\}\}/g, path.dirname(outputDir))
+    result.commands.push(command)
+
+    if (manifest.postProcess) {
+      for (const [name, version] of Object.entries(manifest.postProcess.addDeps)) {
+        result.dependencies.push(`${name}@${version}`)
+      }
+      for (const [name, version] of Object.entries(manifest.postProcess.addDevDeps)) {
+        result.devDependencies.push(`${name}@${version}`)
+      }
+    }
+  }
+
+  const templates = resolveTemplates(config.archetype, config.addons)
+  for (const template of templates) {
+    const files = processTemplateDirectory(template.path, context)
+    for (const [filePath, content] of files) {
+      if (filePath !== 'template.json') {
+        result.files.push({ path: filePath, size: Buffer.byteLength(content, 'utf-8') })
+        result.totalSize += Buffer.byteLength(content, 'utf-8')
+      }
+    }
+  }
+
+  const overlaysPath = path.join(archetypePath, 'overlays')
+  if (fs.existsSync(overlaysPath)) {
+    const files = processTemplateDirectory(overlaysPath, context)
+    for (const [filePath, content] of files) {
+      if (filePath !== 'template.json') {
+        const existingIndex = result.files.findIndex((f) => f.path === filePath)
+        const size = Buffer.byteLength(content, 'utf-8')
+        if (existingIndex >= 0) {
+          const existing = result.files[existingIndex]
+          if (existing) {
+            result.totalSize -= existing.size
+            result.files[existingIndex] = { path: filePath, size }
+          }
+        } else {
+          result.files.push({ path: filePath, size })
+        }
+        result.totalSize += size
+      }
+    }
+  }
+
+  return result
+}
+
 export function generateProject(config: ProjectConfig, outputDir: string): void {
   const context = createTemplateContext({
     projectName: config.projectName,

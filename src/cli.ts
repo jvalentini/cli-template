@@ -22,6 +22,7 @@ const CliOptionsSchema = z.object({
     .min(1, 'Config path cannot be empty')
     .optional()
     .describe('Path to config file for non-interactive mode'),
+  dryRun: z.boolean().default(false).describe('Show what would be generated without writing files'),
   version: z.boolean().default(false).describe('Show version number'),
   help: z.boolean().default(false).describe('Show help message'),
 })
@@ -48,6 +49,7 @@ ${bold('COMMANDS:')}
 ${bold('OPTIONS:')}
   -o, --output <dir>   Output directory (default: ./<project-name>)
   -c, --config <file>  Config file for non-interactive mode (JSON)
+  -n, --dry-run        Show what would be generated without writing files
   -v, --version        Show version number
   -h, --help           Show this help message
 
@@ -126,6 +128,11 @@ function parseArgs(args: readonly string[]): ParsedCli {
         i += 2
         break
       }
+      case '-n':
+      case '--dry-run':
+        rawOptions['dryRun'] = true
+        i++
+        break
       case '-v':
       case '--version':
         rawOptions['version'] = true
@@ -198,9 +205,9 @@ async function main(): Promise<void> {
         process.exit(1)
       }
 
-      await runFromConfig(configResult.value, outputPath)
+      await runFromConfig(configResult.value, outputPath, { dryRun: options.dryRun })
     } else {
-      await runWizard(outputPath)
+      await runWizard(outputPath, { dryRun: options.dryRun })
     }
   } catch (err) {
     if (err instanceof CliParseError) {

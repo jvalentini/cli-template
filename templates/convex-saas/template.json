@@ -64,5 +64,35 @@
       "test": "vitest run",
       "test:watch": "vitest"
     }
-  }
+  },
+  "tasks": [
+    {
+      "name": "install",
+      "description": "Install dependencies",
+      "command": "bun install",
+      "condition": "always",
+      "continueOnError": false
+    },
+    {
+      "name": "lefthook",
+      "description": "Install git hooks",
+      "command": "bunx lefthook install",
+      "condition": "always",
+      "continueOnError": true
+    },
+    {
+      "name": "saas-setup",
+      "description": "Configure SaaS template settings",
+      "command": "bun run scripts/setup.ts",
+      "condition": "always",
+      "continueOnError": false
+    },
+    {
+      "name": "convex-init",
+      "description": "Initialize Convex backend",
+      "command": "npx convex dev --once",
+      "condition": "if-convex",
+      "continueOnError": true
+    }
+  ]
 }

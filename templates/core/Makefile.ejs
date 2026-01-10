@@ -11,7 +11,8 @@ help:
 	@echo "=========================================="
 	@echo ""
 	@echo "SETUP:"
-	@echo "  make install        - Install dependencies"
+	@echo "  make setup          - Run all setup tasks (install, git hooks, etc.)"
+	@echo "  make install        - Install dependencies only"
 	@echo ""
 	@echo "DEVELOPMENT:"
 	@echo "  make dev            - Run in development mode"
@@ -45,6 +46,10 @@ help:
 	@echo "  make build-binary   - Build native binary"
 	@echo "  make build-all      - Build all platforms"
 <% } %>
+
+.PHONY: setup
+setup:
+	@bun .bakery/setup.ts
 
 .PHONY: install
 install:

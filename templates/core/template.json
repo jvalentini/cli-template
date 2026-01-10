@@ -5,5 +5,28 @@
   "version": "1.0.0",
   "dependencies": [],
   "prompts": [],
-  "exclude": []
+  "exclude": [],
+  "tasks": [
+    {
+      "name": "install",
+      "description": "Install dependencies",
+      "command": "bun install",
+      "condition": "always",
+      "continueOnError": false
+    },
+    {
+      "name": "git-init",
+      "description": "Initialize git repository",
+      "command": "git init",
+      "condition": "if-no-git",
+      "continueOnError": true
+    },
+    {
+      "name": "lefthook",
+      "description": "Install git hooks",
+      "command": "bunx lefthook install",
+      "condition": "always",
+      "continueOnError": true
+    }
+  ]
 }

@@ -1,0 +1,3 @@
+[test]
+# Don't pick up test files from template directories
+root = "tests/"

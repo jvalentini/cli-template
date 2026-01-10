@@ -12,6 +12,7 @@ import {
   getTemplatesDir,
   loadTemplateManifest,
   resolveTemplates,
+  type SetupTask,
 } from '../templates/loader.js'
 import type { ProjectConfig } from './prompts.js'
 
@@ -171,6 +172,7 @@ function generateFromBaseCommand(
 
   applyTemplateFiles(config, outputDir, context)
   applyOverlays(config, outputDir, context)
+  writeSetupConfig(config, outputDir)
   initGitRepo(outputDir)
 }
 
@@ -285,12 +287,10 @@ function generateFromTemplates(
   }
 
   writeTemplates(allFiles, outputDir)
+  writeSetupConfig(config, outputDir)
   initGitRepo(outputDir)
 }
 
-/**
- * Initialize a git repository in the output directory
- */
 function initGitRepo(outputDir: string): void {
   const gitDir = path.join(outputDir, '.git')
   if (!fs.existsSync(gitDir)) {
@@ -300,6 +300,40 @@ function initGitRepo(outputDir: string): void {
       // Git not available or failed - that's OK
     }
   }
+}
+
+function collectSetupTasks(config: ProjectConfig): SetupTask[] {
+  const templates = resolveTemplates(config.archetype, config.addons)
+  const tasks: SetupTask[] = []
+  const seenNames = new Set<string>()
+
+  for (const template of templates) {
+    for (const task of template.manifest.tasks) {
+      if (!seenNames.has(task.name)) {
+        tasks.push(task)
+        seenNames.add(task.name)
+      }
+    }
+  }
+
+  return tasks
+}
+
+function writeSetupConfig(config: ProjectConfig, outputDir: string): void {
+  const tasks = collectSetupTasks(config)
+
+  const setupConfig = {
+    archetype: config.archetype,
+    generatedAt: new Date().toISOString(),
+    tasks,
+  }
+
+  const bakeryDir = path.join(outputDir, '.bakery')
+  if (!fs.existsSync(bakeryDir)) {
+    fs.mkdirSync(bakeryDir, { recursive: true })
+  }
+
+  fs.writeFileSync(path.join(bakeryDir, 'setup.json'), `${JSON.stringify(setupConfig, null, 2)}\n`)
 }
 
 /**

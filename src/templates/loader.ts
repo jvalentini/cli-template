@@ -3,6 +3,22 @@ import * as path from 'node:path'
 import { z } from 'zod'
 
 /**
+ * Schema for setup task configuration
+ */
+const SetupTaskSchema = z.object({
+  name: z.string().describe('Unique identifier for the task'),
+  description: z.string().describe('Human-readable description of what this task does'),
+  command: z.string().describe('Shell command to execute'),
+  condition: z
+    .enum(['always', 'if-no-git', 'if-convex', 'if-docker'])
+    .default('always')
+    .describe('When to run this task'),
+  continueOnError: z.boolean().default(false).describe('Continue if this task fails'),
+})
+
+export type SetupTask = z.infer<typeof SetupTaskSchema>
+
+/**
  * Schema for post-processing configuration
  */
 const PostProcessSchema = z.object({
@@ -64,13 +80,14 @@ export const ArchetypeManifestSchema = z.object({
   // Post-processing for baseCommand templates
   postProcess: PostProcessSchema.optional().describe('Post-processing steps after base generation'),
 
-  // Hooks
   hooks: z
     .object({
       beforeGenerate: z.string().optional(),
       afterGenerate: z.string().optional(),
     })
     .default({}),
+
+  tasks: z.array(SetupTaskSchema).default([]),
 })
 
 export type ArchetypeManifest = z.infer<typeof ArchetypeManifestSchema>
@@ -194,6 +211,7 @@ export function loadCoreTemplate(): LoadedTemplate | null {
         prompts: [],
         exclude: [],
         hooks: {},
+        tasks: [],
       },
       path: corePath,
       isPlugin: false,

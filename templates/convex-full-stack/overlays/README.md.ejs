@@ -28,7 +28,7 @@ bun run dev
 <%= projectName %>/
 ├── convex/              # Convex backend
 │   ├── schema.ts        # Database schema
-│   ├── myFunctions.ts   # Query and mutation functions
+│   ├── items.ts         # Query and mutation functions
 │   └── _generated/      # Auto-generated types
 ├── src/
 │   ├── routes/          # TanStack Router pages
@@ -45,13 +45,13 @@ bun run dev
 Data fetching uses `@convex-dev/react-query` for seamless integration:
 
 ```typescript
-import { useQuery } from '@tanstack/react-query';
-import { convexQuery } from '@convex-dev/react-query';
-import { api } from '../convex/_generated/api';
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { convexQuery } from '@convex-dev/react-query'
+import { api } from '../convex/_generated/api'
 
-function Messages() {
-  const { data } = useQuery(convexQuery(api.myFunctions.listItems, {}));
-  return <ul>{data?.map(item => <li key={item._id}>{item.name}</li>)}</ul>;
+function Items() {
+  const { data } = useSuspenseQuery(convexQuery(api.items.list, {}))
+  return <ul>{data?.map(item => <li key={item._id}>{item.name}</li>)}</ul>
 }
 ```
 

@@ -141,7 +141,7 @@ function validateFull(projectDir: string): string[] {
   }
 
   info('  Running make test...')
-  const testResult = runCommand(projectDir, 'bun test')
+  const testResult = runCommand(projectDir, 'bun run test')
   if (!testResult.success) {
     errors.push(`make test failed: ${testResult.output.slice(0, 500)}`)
   }

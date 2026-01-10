@@ -1,0 +1,43 @@
+# Trivy configuration
+# https://aquasecurity.github.io/trivy/
+
+# Scanning options
+scan:
+  # Skip directories
+  skip-dirs:
+    - node_modules
+    - .git
+    - coverage
+    - docs
+
+  # Skip files
+  skip-files:
+    - "**/*.test.ts"
+    - "**/*.spec.ts"
+
+# Vulnerability scanning
+vulnerability:
+  # Severity levels to report
+  severity:
+    - CRITICAL
+    - HIGH
+    - MEDIUM
+
+  # Ignore unfixed vulnerabilities
+  ignore-unfixed: false
+
+# Secret scanning
+secret:
+  # Enable secret scanning
+  enabled: true
+
+# Misconfiguration scanning
+misconfiguration:
+  # Enable misconfiguration scanning
+  enabled: true
+
+# Output format
+format: table
+
+# Exit code on findings
+exit-code: 1

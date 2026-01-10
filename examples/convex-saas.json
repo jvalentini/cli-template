@@ -1,0 +1,6 @@
+{
+  "projectName": "my-saas-app",
+  "description": "A full SaaS app with Stripe billing and authentication",
+  "archetype": "convex-saas",
+  "addons": []
+}

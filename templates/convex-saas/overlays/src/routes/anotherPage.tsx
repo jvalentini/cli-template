@@ -1,0 +1,46 @@
+import { convexQuery } from '@convex-dev/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useMutation } from 'convex/react'
+import { api } from '../../convex/_generated/api'
+
+export const Route = createFileRoute('/anotherPage')({
+  component: AnotherPage,
+})
+
+function AnotherPage() {
+  const createItem = useMutation(api.items.create)
+
+  const { data: items } = useSuspenseQuery(convexQuery(api.items.list, {}))
+
+  return (
+    <main className="p-8 flex flex-col gap-16">
+      <h1 className="text-4xl font-bold text-center">Better Parent</h1>
+      <div className="flex flex-col gap-8 max-w-lg mx-auto">
+        <p>
+          Items:{' '}
+          {items.length === 0
+            ? 'No items yet'
+            : items.map((item: { name: string }) => item.name).join(', ')}
+        </p>
+        <p>Click the button below to add an item to the database.</p>
+        <p>
+          <button
+            type="button"
+            className="bg-dark dark:bg-light text-light dark:text-dark text-sm px-4 py-2 rounded-md border-2"
+            onClick={() => {
+              createItem({
+                name: `Item ${Math.round(Math.random() * 100)}`,
+              }).then(() => alert('Item added!'))
+            }}
+          >
+            Add an item
+          </button>
+        </p>
+        <Link to="/" className="text-blue-600 underline hover:no-underline">
+          Back
+        </Link>
+      </div>
+    </main>
+  )
+}

@@ -71,7 +71,7 @@ ${bold('CONFIG FILE FORMAT:')}
   ${dim('{')}
   ${dim('  "projectName": "my-app",')}
   ${dim('  "description": "My awesome app",')}
-  ${dim('  "archetype": "cli",  // cli | library | api | full-stack | convex-full-stack')}
+  ${dim('  "archetype": "cli",  // cli | library | api | full-stack | convex-full-stack | convex-saas')}
   ${dim('  "license": "MIT",')}
   ${dim('  "addons": ["docker", "ci", "docs"]')}
   ${dim('}')}

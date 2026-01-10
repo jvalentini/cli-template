@@ -1,0 +1,122 @@
+# <%= projectName %>
+
+<%= description %>
+
+## Stack
+
+- **Frontend**: TanStack Start (React + TanStack Router)
+- **Backend**: Convex (real-time database)
+- **Auth**: Convex Auth (OTP + GitHub OAuth)
+- **Billing**: Stripe (subscriptions + webhooks)
+- **Email**: Resend (transactional emails)
+- **Tooling**: Biome + Oxlint + Lefthook
+
+## Getting Started
+
+### 1. Install Dependencies
+
+```bash
+bun install
+```
+
+### 2. Set Up Environment Variables
+
+Copy `.env.local.example` to `.env.local` and fill in your keys:
+
+```bash
+cp .env.local.example .env.local
+```
+
+You'll need:
+- **Convex**: Deployment URL (auto-configured on first run)
+- **GitHub OAuth**: Client ID and secret from [GitHub Developer Settings](https://github.com/settings/developers)
+- **Stripe**: Secret key and webhook secret from [Stripe Dashboard](https://dashboard.stripe.com)
+- **Resend**: API key from [Resend Dashboard](https://resend.com)
+
+### 3. Start Development
+
+```bash
+# Start Convex backend (opens dashboard on first run)
+bunx convex dev
+
+# In another terminal, start the frontend
+bun run dev
+```
+
+## Project Structure
+
+```
+<%= projectName %>/
+├── convex/                    # Convex backend
+│   ├── schema.ts              # Database schema
+│   ├── auth.ts                # Auth configuration
+│   ├── auth.config.ts         # Auth providers
+│   ├── app.ts                 # User queries/mutations
+│   ├── stripe.ts              # Stripe billing logic
+│   ├── http.ts                # Stripe webhooks
+│   ├── email/                 # Email templates
+│   └── otp/                   # OTP authentication
+├── src/
+│   ├── routes/                # TanStack Router pages
+│   │   ├── login.tsx          # Login page
+│   │   ├── onboarding.tsx     # User setup
+│   │   ├── _auth/             # Protected routes
+│   │   │   └── dashboard/     # Dashboard pages
+│   ├── components/ui/         # UI components
+│   └── lib/                   # Utilities
+├── template.config.ts         # Branding configuration
+├── biome.json                 # Linting config
+└── Makefile                   # Standard commands
+```
+
+## Features
+
+### Authentication
+
+- **OTP Login**: Email-based magic link authentication
+- **GitHub OAuth**: Social login with GitHub
+- **Protected Routes**: Automatic redirect for unauthenticated users
+
+### Billing
+
+- **Plans**: Free, Pro, and Team tiers
+- **Checkout**: Stripe Checkout integration
+- **Webhooks**: Automatic subscription sync
+- **Portal**: Customer billing portal access
+
+### Email
+
+- **Verification**: OTP code emails via Resend
+- **Subscription**: Billing notification emails
+
+## Commands
+
+```bash
+make install     # Install dependencies
+make dev         # Run development server
+make check       # Run typecheck + lint + oxlint
+make test        # Run tests
+make build       # Build for production
+```
+
+## Configuration
+
+Edit `template.config.ts` to customize branding:
+
+```typescript
+export const config = {
+  app: {
+    name: 'Your App',
+    tagline: 'Your tagline here',
+  },
+  company: {
+    name: 'Your Company',
+    email: 'support@example.com',
+  },
+  // ...
+}
+```
+
+## License
+
+<%= license %><% if (author) { %> - <%= author %><% } %>

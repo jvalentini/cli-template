@@ -13,6 +13,7 @@ export const ArchetypeSchema = z.enum([
   'api',
   'full-stack',
   'convex-full-stack',
+  'convex-saas',
 ]) satisfies z.ZodType<Archetype>
 
 export const ApiFrameworkSchema = z.enum([

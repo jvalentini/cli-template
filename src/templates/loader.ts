@@ -131,7 +131,7 @@ export function discoverArchetypes(): LoadedTemplate[] {
   const templatesDir = getTemplatesDir()
   const archetypes: LoadedTemplate[] = []
 
-  const archetypeDirs = ['cli', 'library', 'api', 'full-stack', 'convex-full-stack']
+  const archetypeDirs = ['cli', 'library', 'api', 'full-stack', 'convex-full-stack', 'convex-saas']
   for (const dir of archetypeDirs) {
     const dirPath = path.join(templatesDir, dir)
     if (fs.existsSync(dirPath)) {
@@ -184,7 +184,6 @@ export function loadCoreTemplate(): LoadedTemplate | null {
 
   const manifest = loadTemplateManifest(corePath)
   if (!manifest) {
-    // Create a default manifest for core if none exists
     return {
       manifest: {
         name: 'core',

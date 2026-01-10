@@ -14,7 +14,11 @@
       "!**/coverage",
       "!**/*.lock",
       "!**/*.log",
-      "!templates/**/overlays"
+      "!convex/_generated",
+      "!**/routeTree.gen.ts",
+      "!.tanstack",
+      "!.nitro",
+      "!.output"
     ]
   },
   "formatter": {
@@ -44,7 +48,8 @@
       "style": {
         "noParameterAssign": "error",
         "useConst": "error",
-        "useTemplate": "error"
+        "useTemplate": "error",
+        "noNonNullAssertion": "warn"
       },
       "suspicious": {
         "noExplicitAny": "warn",
@@ -53,8 +58,7 @@
       },
       "complexity": {
         "noForEach": "off",
-        "useSimplifiedLogicExpression": "warn",
-        "useLiteralKeys": "off"
+        "useSimplifiedLogicExpression": "warn"
       },
       "performance": {
         "noDelete": "error"
@@ -86,5 +90,30 @@
     "linter": {
       "enabled": true
     }
-  }
+  },
+  "css": {
+    "parser": {
+      "allowWrongLineComments": true,
+      "cssModules": false,
+      "tailwindDirectives": true
+    },
+    "formatter": {
+      "enabled": true
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          }
+        }
+      }
+    }
+  ]
 }

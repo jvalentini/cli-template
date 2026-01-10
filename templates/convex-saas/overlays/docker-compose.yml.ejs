@@ -1,0 +1,37 @@
+services:
+  <%= projectName %>:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: <%= projectName %>
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  # Development service with hot reload
+  <%= projectName %>-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: <%= projectName %>-dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    command: bun run dev
+    profiles:
+      - dev

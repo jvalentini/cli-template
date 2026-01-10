@@ -2,7 +2,13 @@ import { execSync } from 'node:child_process'
 import * as readline from 'node:readline'
 import { blue, bold, cyan, dim, green, red, yellow } from '../utils/colors.js'
 
-export type Archetype = 'cli' | 'library' | 'api' | 'full-stack' | 'convex-full-stack'
+export type Archetype =
+  | 'cli'
+  | 'library'
+  | 'api'
+  | 'full-stack'
+  | 'convex-full-stack'
+  | 'convex-saas'
 
 export type ApiFramework = 'hono' | 'express' | 'elysia'
 
@@ -350,6 +356,7 @@ export async function runPrompts(): Promise<ProjectConfig> {
       { value: 'api', label: 'REST API - Backend service' },
       { value: 'full-stack', label: 'Full-Stack - Monorepo with API + Web' },
       { value: 'convex-full-stack', label: 'Convex App - Real-time app with TanStack Start' },
+      { value: 'convex-saas', label: 'Convex SaaS - Full SaaS with Stripe, Auth, TanStack Start' },
     ],
     0,
   )
@@ -382,7 +389,7 @@ export async function runPrompts(): Promise<ProjectConfig> {
     )
   }
 
-  if (archetype === 'convex-full-stack') {
+  if (archetype === 'convex-full-stack' || archetype === 'convex-saas') {
     webFramework = 'tanstack-start'
   }
 
@@ -404,9 +411,13 @@ export async function runPrompts(): Promise<ProjectConfig> {
     api: 'A REST API built with TypeScript and Bun',
     'full-stack': 'A full-stack application built with TypeScript',
     'convex-full-stack': 'A real-time app with Convex and TanStack Start',
+    'convex-saas': 'A full SaaS app with Stripe billing and authentication',
   }[archetype]
 
-  const description = await promptWithDefault('Description', defaultDescription)
+  const description = await promptWithDefault(
+    'Description',
+    defaultDescription ?? 'A TypeScript project',
+  )
   const author = await promptWithDefault('Author name', gitUser.name || '')
   const githubUsername = await promptWithDefault('GitHub username', detectedGithubUsername || '')
 
@@ -424,7 +435,7 @@ export async function runPrompts(): Promise<ProjectConfig> {
 
   const addons: Addon[] = []
 
-  if (archetype !== 'convex-full-stack') {
+  if (archetype !== 'convex-full-stack' && archetype !== 'convex-saas') {
     const validationStrategy = await promptSelect<ValidationStrategy>(
       bold(blue('🔒 Validation & Error Handling')),
       [
@@ -508,7 +519,7 @@ export async function runPrompts(): Promise<ProjectConfig> {
     }
   }
 
-  if (archetype === 'convex-full-stack') {
+  if (archetype === 'convex-full-stack' || archetype === 'convex-saas') {
     addons.push('convex', 'tanstack-query')
   }
 
@@ -537,6 +548,7 @@ const archetypeLabels: Record<Archetype, string> = {
   api: 'REST API',
   'full-stack': 'Full-Stack',
   'convex-full-stack': 'Convex Full-Stack',
+  'convex-saas': 'Convex SaaS',
 }
 
 const frameworkLabels: Record<string, string> = {

@@ -425,5 +425,188 @@ describe('Plugin Loader', () => {
       expect(plugin).not.toBeNull()
       expect(plugin?.templates).toHaveLength(0)
     })
+
+    it('should load archetypes from plugin', async () => {
+      fs.writeFileSync(
+        path.join(pluginDir, 'plugin.json'),
+        JSON.stringify({
+          name: 'archetype-plugin',
+          displayName: 'Archetype Plugin',
+          description: 'Plugin with custom archetype',
+          version: '1.0.0',
+          archetypes: ['./archetypes/custom'],
+        }),
+      )
+
+      const archetypeDir = path.join(pluginDir, 'archetypes', 'custom')
+      fs.mkdirSync(archetypeDir, { recursive: true })
+      fs.writeFileSync(
+        path.join(archetypeDir, 'template.json'),
+        JSON.stringify({
+          name: 'custom',
+          displayName: 'Custom Archetype',
+          description: 'A custom archetype',
+        }),
+      )
+
+      const plugin = await loadPlugin(pluginDir)
+      expect(plugin).not.toBeNull()
+      expect(plugin?.templates).toHaveLength(1)
+      expect(plugin?.templates[0]?.manifest.name).toBe('custom')
+    })
+
+    it('should load addons from plugin', async () => {
+      fs.writeFileSync(
+        path.join(pluginDir, 'plugin.json'),
+        JSON.stringify({
+          name: 'addon-plugin',
+          displayName: 'Addon Plugin',
+          description: 'Plugin with custom addon',
+          version: '1.0.0',
+          addons: ['./addons/custom-feature'],
+        }),
+      )
+
+      const addonDir = path.join(pluginDir, 'addons', 'custom-feature')
+      fs.mkdirSync(addonDir, { recursive: true })
+      fs.writeFileSync(
+        path.join(addonDir, 'template.json'),
+        JSON.stringify({
+          name: 'custom-feature',
+          displayName: 'Custom Feature',
+          description: 'A custom addon',
+        }),
+      )
+
+      const plugin = await loadPlugin(pluginDir)
+      expect(plugin).not.toBeNull()
+      expect(plugin?.templates).toHaveLength(1)
+      expect(plugin?.templates[0]?.manifest.name).toBe('custom-feature')
+    })
+  })
+
+  describe('Plugin Registry Advanced', () => {
+    let registry: ReturnType<typeof createPluginRegistry>
+    let pluginsDir: string
+
+    beforeEach(() => {
+      registry = createPluginRegistry()
+      pluginsDir = path.join(testDir, 'registry-advanced')
+      fs.mkdirSync(pluginsDir, { recursive: true })
+    })
+
+    afterEach(() => {
+      registry.clear()
+      if (fs.existsSync(pluginsDir)) {
+        fs.rmSync(pluginsDir, { recursive: true, force: true })
+      }
+    })
+
+    it('should get all templates from plugins', async () => {
+      const plugin1Dir = path.join(pluginsDir, 'plugin1')
+      fs.mkdirSync(plugin1Dir, { recursive: true })
+      fs.writeFileSync(
+        path.join(plugin1Dir, 'plugin.json'),
+        JSON.stringify({
+          name: 'plugin1',
+          displayName: 'Plugin 1',
+          description: 'First plugin',
+          version: '1.0.0',
+          templates: ['./templates/addon1'],
+        }),
+      )
+
+      const template1Dir = path.join(plugin1Dir, 'templates', 'addon1')
+      fs.mkdirSync(template1Dir, { recursive: true })
+      fs.writeFileSync(
+        path.join(template1Dir, 'template.json'),
+        JSON.stringify({
+          name: 'addon1',
+          displayName: 'Addon 1',
+          description: 'First addon',
+        }),
+      )
+
+      await registry.load(plugin1Dir)
+      const templates = registry.getAllTemplates()
+
+      expect(templates.length).toBeGreaterThan(0)
+      expect(templates[0]?.manifest.name).toBe('addon1')
+      expect(templates[0]?.isPlugin).toBe(true)
+    })
+
+    it('should only return templates from active plugins', async () => {
+      const pluginDir = path.join(pluginsDir, 'test-plugin')
+      fs.mkdirSync(pluginDir, { recursive: true })
+      fs.writeFileSync(
+        path.join(pluginDir, 'plugin.json'),
+        JSON.stringify({
+          name: 'test-plugin',
+          displayName: 'Test Plugin',
+          description: 'A test plugin',
+          version: '1.0.0',
+          templates: ['./templates/test'],
+        }),
+      )
+
+      const templateDir = path.join(pluginDir, 'templates', 'test')
+      fs.mkdirSync(templateDir, { recursive: true })
+      fs.writeFileSync(
+        path.join(templateDir, 'template.json'),
+        JSON.stringify({
+          name: 'test',
+          displayName: 'Test',
+          description: 'Test template',
+        }),
+      )
+
+      await registry.load(pluginDir)
+      expect(registry.getAllTemplates()).toHaveLength(1)
+
+      await registry.unload('test-plugin')
+      expect(registry.getAllTemplates()).toHaveLength(0)
+    })
+
+    it('should return empty array when no plugins loaded', () => {
+      expect(registry.getAllTemplates()).toEqual([])
+    })
+
+    it('should get hooks from plugins', async () => {
+      const pluginDir = path.join(pluginsDir, 'hooks-plugin')
+      fs.mkdirSync(pluginDir, { recursive: true })
+      fs.writeFileSync(
+        path.join(pluginDir, 'plugin.json'),
+        JSON.stringify({
+          name: 'hooks-plugin',
+          displayName: 'Hooks Plugin',
+          description: 'Plugin with hooks',
+          version: '1.0.0',
+        }),
+      )
+
+      await registry.load(pluginDir)
+      const hooks = registry.getHooks()
+
+      expect(Array.isArray(hooks)).toBe(true)
+    })
+
+    it('should get prompts from plugins', async () => {
+      const pluginDir = path.join(pluginsDir, 'prompts-plugin')
+      fs.mkdirSync(pluginDir, { recursive: true })
+      fs.writeFileSync(
+        path.join(pluginDir, 'plugin.json'),
+        JSON.stringify({
+          name: 'prompts-plugin',
+          displayName: 'Prompts Plugin',
+          description: 'Plugin with prompts',
+          version: '1.0.0',
+        }),
+      )
+
+      await registry.load(pluginDir)
+      const prompts = registry.getAllPrompts()
+
+      expect(Array.isArray(prompts)).toBe(true)
+    })
   })
 })

@@ -30,6 +30,7 @@ help:
 	@echo "BUILD:"
 	@echo "  make build              - Build TypeScript to dist/"
 	@echo "  make build-binary       - Build binary for current platform"
+	@echo "  make bakery-bin         - Build and install binary to ~/.local/bin/bakery"
 	@echo "  make build-all          - Build binaries for all platforms"
 	@echo ""
 	@echo "TESTING:"
@@ -244,6 +245,12 @@ build:
 .PHONY: build-binary
 build-binary:
 	@bun build src/cli.ts --compile --outfile bakery
+
+.PHONY: bakery-bin
+bakery-bin: build-binary
+	@mkdir -p "$(HOME)/.local/bin"
+	@install -m 755 bakery "$(HOME)/.local/bin/bakery"
+	@echo "Installed bakery to $(HOME)/.local/bin/bakery"
 
 .PHONY: build-all
 build-all:

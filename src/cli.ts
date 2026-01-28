@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
-import { createRequire } from 'node:module'
 import { z } from 'zod'
+import pkg from '../package.json'
 import { handleCacheCommand } from './commands/cache.js'
 import { handleInspectCommand } from './commands/inspect.js'
 import { handleLintCommand } from './commands/lint.js'
@@ -13,8 +13,6 @@ import { fetchRemoteTemplate, formatRemoteRef } from './remote/index.js'
 import { bold, cyan, dim, error, green } from './utils/colors.js'
 import { runFromConfig, runWizard } from './wizard/index.js'
 
-const require = createRequire(import.meta.url)
-const pkg = require('../package.json') as { version: string }
 const VERSION = pkg.version
 
 const CliOptionsSchema = z.object({

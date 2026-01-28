@@ -1,6 +1,6 @@
 import * as fs from 'node:fs'
-import { createRequire } from 'node:module'
 import * as path from 'node:path'
+import bakeryPackage from '../../package.json'
 import { hashContent, hashFile } from '../sync/hash.js'
 import {
   createManifest,
@@ -14,8 +14,7 @@ import { createTemplateContext, processTemplateDirectory } from '../templates/en
 import { getTemplatesDir, resolveTemplates } from '../templates/loader.js'
 import { bold, cyan, dim, green, red, yellow } from '../utils/colors.js'
 
-const require = createRequire(import.meta.url)
-const pkg = require('../../package.json') as { version: string }
+const BAKERY_VERSION = bakeryPackage.version
 
 interface SyncOptions {
   check: boolean
@@ -190,7 +189,7 @@ async function performSync(projectDir: string, options: SyncOptions): Promise<Sy
 
   if (!options.check) {
     const newManifestResult = createManifest(projectDir, {
-      bakeryVersion: pkg.version,
+      bakeryVersion: BAKERY_VERSION,
       archetype: manifest.archetype,
       addons: manifest.addons,
     })
